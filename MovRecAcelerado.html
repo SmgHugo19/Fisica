@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador MRUA - Modo Juego y Velocímetro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f1f5f9; color: #334155; overflow-x: hidden; }
+        
+        /* Tarjetas estilo Modern Clean */
+        .white-card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border-radius: 1.5rem; transition: box-shadow 0.3s ease; }
+        .white-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04); }
+        .gradient-text { background: linear-gradient(to right, #0ea5e9, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Contenedor del Canvas */
+        .canvas-wrapper { position: relative; width: 100%; height: 350px; background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 55%, #cbd5e1 55%, #94a3b8 100%); border-radius: 1rem; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: inset 0 4px 10px rgba(0,0,0,0.05); }
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* Sliders personalizados */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #e2e8f0; border-radius: 4px; }
+        input[type=range]::-webkit-slider-thumb { border: 2px solid #fff; height: 20px; width: 20px; border-radius: 50%; background: #3b82f6; cursor: pointer; -webkit-appearance: none; margin-top: -6px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: transform 0.1s; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        input[type=range]:disabled::-webkit-slider-thumb { background: #94a3b8; cursor: not-allowed; }
+        input.slider-accel::-webkit-slider-thumb { background: #ef4444; }
+        input.slider-pos::-webkit-slider-thumb { background: #10b981; }
+
+        /* Cajas de texto numéricas */
+        input[type=number] { -moz-appearance: textfield; font-weight: bold; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 0.5rem; padding: 0.25rem 0.5rem; text-align: center; color: #0f172a; width: 80px; transition: all 0.2s; }
+        input[type=number]:focus { outline: none; border-color: #0ea5e9; background: #fff; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
+        input[type=number]:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+
+        /* Botones de Radio Modificados */
+        .radio-label { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; font-size: 0.875rem; font-weight: 600; color: #64748b; }
+        .radio-label:hover { background: #f1f5f9; }
+        .radio-input:checked + .radio-label { background: #f0f9ff; border-color: #0ea5e9; color: #0369a1; }
+        .radio-input:disabled + .radio-label { opacity: 0.5; cursor: not-allowed; }
+        .radio-input.accel-input:checked + .radio-label { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+        .radio-input.accel-pos:checked + .radio-label { background: #ecfdf5; border-color: #10b981; color: #047857; }
+
+        /* Interruptores (Toggle switches) */
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
+        .toggle-label { width: 3rem; height: 1.5rem; background-color: #cbd5e1; border-radius: 9999px; transition: all 0.3s; }
+        .toggle-dot { width: 1.25rem; height: 1.25rem; background-color: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s; transform: translateX(0.125rem); }
+        .toggle-checkbox:checked ~ .toggle-dot { transform: translateX(1.625rem); }
+        .game-checkbox:checked + .toggle-label { background-color: #8b5cf6; } 
+        .game-checkbox:checked { border-color: #8b5cf6; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .quiz-correct { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #166534; }
+        .quiz-incorrect { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- Encabezado Principal -->
+        <header class="white-card p-10 md:p-14 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-sky-400 via-emerald-400 to-indigo-500"></div>
+            <span class="inline-block py-1 px-4 rounded-full bg-sky-50 text-sky-700 font-bold text-xs tracking-widest uppercase mb-4 border border-sky-100 shadow-sm">Simulador de Física</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-800">MRUA <span class="gradient-text">Interactive</span></h1>
+            <p class="text-lg text-slate-500 max-w-2xl mx-auto font-medium">Controla las variables o activa el Modo Juego para sentir la aceleración interactuando directamente con el entorno.</p>
+        </header>
+
+        <!-- SECCIÓN 1: TEORÍA -->
+        <section class="white-card p-8 md:p-10">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                <span class="text-2xl bg-amber-100 p-2 rounded-xl">💡</span> Teoría: ¿Qué es el MRUA?
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4 text-slate-600">
+                    <p class="text-lg">El <strong>Movimiento Rectilíneo Uniformemente Acelerado (MRUA)</strong> describe a un objeto que viaja en línea recta y cuya velocidad cambia a un ritmo constante. Ese ritmo constante de cambio se llama <strong>Aceleración</strong>.</p>
+                    
+                    <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100 shadow-sm">
+                        <h3 class="font-bold text-indigo-800 mb-2 flex items-center gap-2">🕹️ Física en Vivo (Modo Juego)</h3>
+                        <p class="text-sm text-indigo-900 mb-2">Este simulador permite usar tus flechas del teclado:</p>
+                        <ul class="text-sm text-indigo-800 space-y-2 list-disc pl-5">
+                            <li><strong>Mantener Flecha Derecha:</strong> El motor aplica aceleración positiva (Hacia adelante). Tu velocidad aumenta.</li>
+                            <li><strong>Mantener Flecha Izquierda:</strong> El motor aplica aceleración negativa (Reversa/Freno).</li>
+                            <li><strong>Soltar todo:</strong> Se aplica <em>fricción</em> con el suelo y el aire, causando que te detengas gradualmente.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 text-center flex flex-col justify-center">
+                        <div class="text-2xl font-black text-emerald-600 mb-1">x</div>
+                        <div class="text-sm font-bold text-emerald-800">Posición (m)</div>
+                        <div class="text-xs text-emerald-600/80 mt-1">NUNCA es negativa. Empieza en 0.</div>
+                    </div>
+                    <div class="bg-sky-50 p-4 rounded-2xl border border-sky-100 text-center flex flex-col justify-center">
+                        <div class="text-2xl font-black text-sky-600 mb-1">v</div>
+                        <div class="text-sm font-bold text-sky-800">Velocidad (m/s)</div>
+                        <div class="text-xs text-sky-600/80 mt-1">Rapidez y dirección del objeto.</div>
+                    </div>
+                    <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100 text-center flex flex-col justify-center">
+                        <div class="text-2xl font-black text-rose-600 mb-1">a</div>
+                        <div class="text-sm font-bold text-rose-800">Aceleración (m/s²)</div>
+                        <div class="text-xs text-rose-600/80 mt-1">Tasa de cambio de la velocidad.</div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100 text-center flex flex-col justify-center">
+                        <div class="text-2xl font-black text-purple-600 mb-1">t</div>
+                        <div class="text-sm font-bold text-purple-800">Tiempo (s)</div>
+                        <div class="text-xs text-purple-600/80 mt-1">El reloj. Se reinicia si chocas con x=0.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: SIMULADOR Y CONTROLES -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="white-card p-6 lg:col-span-4 space-y-6 flex flex-col">
+                
+                <!-- Toggle MODO JUEGO -->
+                <div class="bg-indigo-50 border border-indigo-200 p-5 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                        <h2 class="text-lg font-black text-indigo-900 flex items-center gap-2">🎮 Modo Juego</h2>
+                        <p class="text-xs text-indigo-700 font-medium mt-1">Usa las Flechas Derecha/Izquierda</p>
+                    </div>
+                    <div class="relative inline-block w-14 align-middle select-none">
+                        <input type="checkbox" id="toggleGameMode" class="toggle-checkbox game-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="switchGameMode()"/>
+                        <label for="toggleGameMode" class="toggle-label block overflow-hidden h-7 rounded-full bg-slate-300 cursor-pointer"></label>
+                        <div class="toggle-dot absolute top-0.5 left-0.5 flex items-center justify-center pointer-events-none w-6 h-6"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6 flex-1">
+                    
+                    <!-- Posición (x) -->
+                    <div class="space-y-2">
+                        <label class="flex justify-between text-sm font-semibold text-slate-700">
+                            <span>Posición (x)</span> <span class="text-slate-400 font-normal">m</span>
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="inp_x_slider" class="sim-input slider-pos" min="0" max="200" step="1" value="0" 
+                                onmousedown="isDraggingX = true" onmouseup="isDraggingX = false" ontouchstart="isDraggingX = true" 
+                                ontouchend="isDraggingX = false" oninput="uiUpdateManual('x')">
+                            <input type="number" id="inp_x_num" class="sim-input" value="0" min="0" oninput="uiUpdateManual('x')">
+                        </div>
+                    </div>
+                    
+                    <!-- Velocidad (v) Magnitude -->
+                    <div class="space-y-2">
+                        <label class="flex justify-between text-sm font-semibold text-slate-700">
+                            <span>Magnitud de Velocidad (v)</span> <span class="text-slate-400 font-normal">m/s</span>
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="inp_v_slider" class="sim-input" min="0" max="150" step="0.5" value="0" 
+                                onmousedown="isDraggingV = true" onmouseup="isDraggingV = false" ontouchstart="isDraggingV = true" 
+                                ontouchend="isDraggingV = false" oninput="uiUpdateManual('v')">
+                            <input type="number" id="inp_v_num" class="sim-input" value="0" min="0" oninput="uiUpdateManual('v')">
+                        </div>
+                    </div>
+
+                    <!-- Dirección de Velocidad (Radio) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <input type="radio" name="direction" id="dirFwd" value="1" class="hidden radio-input sim-input" checked onchange="uiUpdateManual('dir')">
+                            <label for="dirFwd" class="radio-label">▶ Adelante</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="direction" id="dirBwd" value="-1" class="hidden radio-input sim-input" onchange="uiUpdateManual('dir')">
+                            <label for="dirBwd" class="radio-label">◀ Atrás</label>
+                        </div>
+                    </div>
+
+                    <div class="my-4 border-t border-slate-100"></div>
+
+                    <!-- Aceleración (a) Magnitude -->
+                    <div class="space-y-2">
+                        <label class="flex justify-between text-sm font-semibold text-slate-700">
+                            <span>Magnitud de Aceleración (a)</span> <span class="text-slate-400 font-normal">m/s²</span>
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="inp_a_slider" class="sim-input slider-accel" min="0" max="25" step="0.5" value="0" 
+                                onmousedown="isDraggingA = true" onmouseup="isDraggingA = false" ontouchstart="isDraggingA = true" 
+                                ontouchend="isDraggingA = false" oninput="uiUpdateManual('a')">
+                            <input type="number" id="inp_a_num" class="sim-input" value="0" min="0" oninput="uiUpdateManual('a')">
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Aceleración (Radio) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <input type="radio" name="accel_type" id="accAccel" value="1" class="hidden radio-input sim-input accel-pos" checked onchange="uiUpdateManual('accType')">
+                            <label for="accAccel" class="radio-label">🚀 Acelerando</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="accel_type" id="accBrake" value="-1" class="hidden radio-input sim-input accel-input" onchange="uiUpdateManual('accType')">
+                            <label for="accBrake" class="radio-label">🛑 Frenando</label>
+                        </div>
+                    </div>
+
+                    <div class="my-4 border-t border-slate-100"></div>
+
+                    <!-- Tiempo Límite Toggle -->
+                    <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 cursor-pointer" for="toggleInfinite">Tiempo Infinito</label>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                                <input type="checkbox" id="toggleInfinite" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="toggleTimeMode()"/>
+                                <label for="toggleInfinite" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                                <div class="toggle-dot absolute top-0.5 left-0.5 flex items-center justify-center pointer-events-none"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="timeLimitContainer" class="space-y-2 transition-opacity">
+                            <label class="flex justify-between text-sm font-semibold text-slate-700">
+                                <span>Límite (s)</span>
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <input type="range" id="inp_tmax_slider" min="5" max="60" step="1" value="15" oninput="uiUpdateTmax(this.value)">
+                                <input type="number" id="inp_tmax_num" value="15" min="1" oninput="uiUpdateTmax(this.value)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Playback -->
+                <div class="grid grid-cols-2 gap-3 pt-4">
+                    <button id="btnPlay" onclick="playPauseSim()" class="col-span-2 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5">▶ Iniciar / Continuar</button>
+                    <button onclick="stopSim()" class="col-span-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold py-2 px-4 rounded-xl shadow-sm transition">⏹ Reiniciar (Reset)</button>
+                </div>
+            </div>
+
+            <div class="white-card p-2 lg:col-span-8 flex flex-col relative overflow-hidden shadow-md">
+                <div class="canvas-wrapper flex-1">
+                    <canvas id="simCanvas"></canvas>
+                    
+                    <!-- HUD Principal -->
+                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-md border border-slate-200 p-4 rounded-xl shadow-sm pointer-events-none">
+                        <div class="font-mono text-sm space-y-1">
+                            <div class="flex justify-between gap-6"><span class="text-slate-500 font-semibold">Tiempo:</span> <span class="font-bold text-slate-800" id="hud_t">0.0 s</span></div>
+                            <div class="flex justify-between gap-6"><span class="text-slate-500 font-semibold">Posición:</span> <span class="font-bold text-emerald-600" id="hud_x">0.0 m</span></div>
+                            <div class="flex justify-between gap-6"><span class="text-slate-500 font-semibold">Velocidad:</span> <span class="font-bold text-sky-600" id="hud_v">0.0 m/s</span></div>
+                            <div class="flex justify-between gap-6"><span class="text-slate-500 font-semibold">Aceleración:</span> <span class="font-bold text-rose-600" id="hud_a">0.0 m/s²</span></div>
+                        </div>
+                    </div>
+
+                    <!-- HUD Metamorfosis -->
+                    <div class="absolute top-4 right-4 bg-slate-900/90 backdrop-blur-md border border-slate-700 p-2 rounded-xl shadow-sm pointer-events-none text-center">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Estado Físico</div>
+                        <div class="text-lg font-black text-white" id="hud_state">🏃 CORREDOR</div>
+                    </div>
+
+                    <!-- Alerta de Colisión en x=0 -->
+                    <div id="collisionAlert" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300 z-50">
+                        <div class="bg-rose-500/90 backdrop-blur text-white px-6 py-4 rounded-2xl shadow-2xl text-center transform scale-110">
+                            <div class="text-3xl mb-1">🛑</div>
+                            <div class="font-black text-xl tracking-tight">¡LÍMITE ALCANZADO (x=0)!</div>
+                            <div class="text-sm font-semibold opacity-90">Vehículo detenido. Tiempo reiniciado.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: DATOS -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="white-card p-6 flex flex-col h-[400px]">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span class="text-xl">📋</span> Registro de Datos
+                    </h2>
+                    <button onclick="exportCSV()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm transition">⬇ CSV</button>
+                </div>
+                <div class="table-container flex-1 border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                    <table class="w-full text-sm text-center" id="dataTable">
+                        <thead class="bg-white text-slate-500 sticky top-0 shadow-sm text-xs uppercase tracking-wider border-b border-slate-200">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold">t (s)</th>
+                                <th class="px-4 py-3 font-semibold">x (m)</th>
+                                <th class="px-4 py-3 font-semibold">v (m/s)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700 font-mono text-sm bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="white-card p-6 h-[400px] flex flex-col">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <span class="text-xl">📈</span> Gráfica x(t)
+                </h2>
+                <div class="flex-1 relative w-full">
+                    <canvas id="graphCanvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: QUIZ -->
+        <section class="white-card p-8 md:p-12 relative overflow-hidden shadow-md">
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-amber-50 rounded-full opacity-50 pointer-events-none"></div>
+            
+            <div class="mb-8 border-b border-slate-100 pb-4">
+                <h2 class="text-3xl font-extrabold text-slate-800 flex items-center gap-3"><span class="text-3xl">🎯</span> Reto de Conocimientos</h2>
+                <p class="text-slate-500 mt-2 font-medium">Se eligen 5 preguntas al azar para evaluar tu comprensión del MRUA.</p>
+            </div>
+
+            <div id="quizContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+            <div class="mt-8 bg-slate-50 border border-slate-200 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+                <div id="quizResult" class="text-2xl font-black text-slate-800"></div>
+                <div class="flex flex-wrap gap-3">
+                    <button id="btnEval" onclick="evalQuiz()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-xl shadow-md transition transform hover:-translate-y-0.5">Calificar Respuestas</button>
+                    <button id="btnRetry" onclick="retryQuiz()" class="hidden bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl shadow-sm transition">↻ Reintentar estas</button>
+                    <button id="btnNew" onclick="generateQuiz()" class="hidden bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl shadow-sm transition">✨ Generar Nuevas</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="text-center py-10 mt-6 text-slate-500 border-t border-slate-200">
+            <p class="text-sm font-semibold uppercase tracking-widest mb-2">Diseño y Desarrollo por</p>
+            <h3 class="text-2xl font-black text-slate-800 mb-1">Hugo Omar Gamez Arroyo</h3>
+            <p class="text-sky-600 font-bold">Ingeniería en Sistemas</p>
+        </footer>
+
+    </div>
+
+    <!-- SCRIPT PRINCIPAL -->
+    <script>
+        let isPlaying = false;
+        let isGameMode = false;
+        let infiniteTime = false;
+        
+        // Variables de la física
+        let t_current = 0;
+        let x_current = 0; // Siempre >= 0
+        let v_current = 0; 
+        let a_current = 0; 
+        let t_max = 15;
+        
+        let lastTime = null;
+        let dataHistory = [];
+        let nextDataTime = 0;
+
+        // Banderas para los sliders
+        let isDraggingX = false;
+        let isDraggingV = false;
+        let isDraggingA = false;
+
+        // Entorno del Modo Juego y Animación
+        let keys = { ArrowRight: false, ArrowLeft: false };
+        const GAME_ACCEL = 10; 
+        const FRICTION = 6;    
+        
+        let charCycle = 0; 
+        let currentDrawY = 0; 
+        let speedLines = [];
+
+        // --- MANEJO DE EVENTOS (TECLADO) ---
+        window.addEventListener('keydown', (e) => {
+            if (isGameMode && (e.code === 'ArrowRight' || e.code === 'ArrowLeft')) {
+                keys[e.code] = true; e.preventDefault();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (isGameMode && (e.code === 'ArrowRight' || e.code === 'ArrowLeft')) keys[e.code] = false;
+        });
+
+        function switchGameMode() {
+            isGameMode = document.getElementById('toggleGameMode').checked;
+            
+            const inputs = document.querySelectorAll('.sim-input');
+            inputs.forEach(inp => inp.disabled = isGameMode);
+
+            if (isGameMode && !isPlaying) {
+                playPauseSim(true);
+            } else if (!isGameMode) {
+                keys = { ArrowRight: false, ArrowLeft: false };
+            }
+        }
+
+        function uiUpdateManual(type) {
+            if (isGameMode) return;
+
+            let x_val = Math.max(0, parseFloat(document.getElementById('inp_x_num').value) || 0);
+            let v_mag = Math.max(0, parseFloat(document.getElementById('inp_v_num').value) || 0);
+            let a_mag = Math.max(0, parseFloat(document.getElementById('inp_a_num').value) || 0);
+
+            let dir = document.getElementById('dirFwd').checked ? 1 : -1;
+            let accType = document.getElementById('accAccel').checked ? 1 : -1;
+
+            if (type === 'x') {
+                x_val = Math.max(0, parseFloat(document.getElementById('inp_x_' + (isDraggingX ? 'slider' : 'num')).value) || 0);
+                if(isDraggingX) document.getElementById('inp_x_num').value = x_val;
+                else document.getElementById('inp_x_slider').value = x_val;
+                x_current = x_val;
+            }
+            if (type === 'v') {
+                v_mag = Math.max(0, parseFloat(document.getElementById('inp_v_' + (isDraggingV ? 'slider' : 'num')).value) || 0);
+                if(isDraggingV) document.getElementById('inp_v_num').value = v_mag;
+                else document.getElementById('inp_v_slider').value = v_mag;
+                v_current = v_mag * dir;
+            }
+            if (type === 'a') {
+                a_mag = Math.max(0, parseFloat(document.getElementById('inp_a_' + (isDraggingA ? 'slider' : 'num')).value) || 0);
+                if(isDraggingA) document.getElementById('inp_a_num').value = a_mag;
+                else document.getElementById('inp_a_slider').value = a_mag;
+                a_current = a_mag * (dir * accType);
+            }
+            if (type === 'dir' || type === 'accType') {
+                v_current = v_mag * dir;
+                a_current = a_mag * (dir * accType);
+            }
+
+            if (!isPlaying) drawFrame();
+            updateHUD();
+        }
+
+        function syncPhysicsToUI() {
+            let v_mag = Math.abs(v_current);
+            let a_mag = Math.abs(a_current);
+
+            let dir = 1;
+            if (v_mag > 0.01) dir = Math.sign(v_current);
+            else if (a_mag > 0.01) dir = Math.sign(a_current);
+
+            let accType = 1; 
+            if (v_mag > 0.01 && a_mag > 0.01) accType = (Math.sign(v_current) === Math.sign(a_current)) ? 1 : -1;
+
+            document.getElementById(dir === 1 ? 'dirFwd' : 'dirBwd').checked = true;
+            document.getElementById(accType === 1 ? 'accAccel' : 'accBrake').checked = true;
+
+            if (!isDraggingX && !isGameMode) {
+                const slX = document.getElementById('inp_x_slider');
+                if (x_current > parseFloat(slX.max)) slX.max = Math.ceil(x_current + 50);
+                slX.value = x_current;
+                document.getElementById('inp_x_num').value = x_current.toFixed(1);
+            }
+            if (!isDraggingV && !isGameMode) {
+                const slV = document.getElementById('inp_v_slider');
+                if (v_mag > parseFloat(slV.max)) slV.max = Math.ceil(v_mag + 50);
+                slV.value = v_mag;
+                document.getElementById('inp_v_num').value = v_mag.toFixed(1);
+            }
+            if (!isDraggingA && !isGameMode) {
+                document.getElementById('inp_a_slider').value = a_mag;
+                document.getElementById('inp_a_num').value = a_mag.toFixed(1);
+            }
+
+            updateHUD();
+        }
+
+        function updateHUD() {
+            document.getElementById('hud_t').innerText = t_current.toFixed(2) + " s";
+            document.getElementById('hud_x').innerText = x_current.toFixed(2) + " m";
+            document.getElementById('hud_v').innerText = Math.abs(v_current).toFixed(2) + " m/s"; 
+            document.getElementById('hud_a').innerText = Math.abs(a_current).toFixed(2) + " m/s²";
+        }
+
+        function toggleTimeMode() {
+            infiniteTime = document.getElementById('toggleInfinite').checked;
+            document.getElementById('timeLimitContainer').style.opacity = infiniteTime ? '0.3' : '1';
+            document.getElementById('inp_tmax_slider').disabled = infiniteTime;
+            document.getElementById('inp_tmax_num').disabled = infiniteTime;
+        }
+
+        function uiUpdateTmax(val) {
+            let num = parseFloat(val);
+            if (isNaN(num) || num <= 0) num = 1;
+            t_max = num;
+            document.getElementById('inp_tmax_slider').value = num;
+            document.getElementById('inp_tmax_num').value = num;
+        }
+
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            if(!isPlaying) drawFrame();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawClouds(offset) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            const clouds = [ {x: 50, y: 40, s: 1}, {x: 300, y: 70, s: 0.7}, {x: 600, y: 30, s: 1.2}, {x: 900, y: 80, s: 0.8} ];
+            clouds.forEach(c => {
+                let drawX = (c.x + offset * 0.1) % (canvas.width + 200);
+                if (drawX < -100) drawX += canvas.width + 200;
+                ctx.beginPath();
+                ctx.arc(drawX, c.y, 30*c.s, 0, Math.PI*2);
+                ctx.arc(drawX+25*c.s, c.y-10*c.s, 35*c.s, 0, Math.PI*2);
+                ctx.arc(drawX+50*c.s, c.y, 30*c.s, 0, Math.PI*2);
+                ctx.fill();
+            });
+        }
+
+        function drawSpeedLines(speed) {
+            if (speed < 30) return;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            if(Math.random() > 0.4) {
+                speedLines.push({
+                    x: Math.sign(v_current) > 0 ? canvas.width + 50 : -50,
+                    y: Math.random() * canvas.height,
+                    len: 50 + Math.random() * 100,
+                    speed: (15 + Math.random() * 25) * (Math.sign(v_current) || 1)
+                });
+            }
+            for (let i = speedLines.length - 1; i >= 0; i--) {
+                let sl = speedLines[i];
+                ctx.beginPath(); ctx.moveTo(sl.x, sl.y); ctx.lineTo(sl.x - sl.len * Math.sign(sl.speed), sl.y); ctx.stroke();
+                if (isPlaying) sl.x -= sl.speed;
+                if (sl.x < -200 || sl.x > canvas.width + 200) speedLines.splice(i, 1);
+            }
+        }
+
+        function drawRunner(cx, cy, facing) {
+            ctx.save(); ctx.translate(cx, cy); ctx.scale(facing, 1);
+            const skin = '#1e293b', shirt = '#fbbf24', shorts = '#10b981', shoes = '#ef4444';
+            let cycle = isPlaying ? charCycle : 0.2;
+            let aLeg1 = Math.sin(cycle)*1.3, aLeg2 = Math.sin(cycle+Math.PI)*1.3;
+            let aArm1 = Math.sin(cycle+Math.PI)*1.3, aArm2 = Math.sin(cycle)*1.3;
+
+            function drawLimb(sx, sy, ang, len1, len2, isLeg) {
+                ctx.strokeStyle = skin; ctx.lineWidth = 6; ctx.lineCap = 'round';
+                let mx = sx + Math.sin(ang)*len1, my = sy + Math.cos(ang)*len1;
+                ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(mx, my); ctx.stroke();
+                let bAng = ang + (isLeg ? (Math.sin(ang)>0 ? 0 : -0.8) : (Math.sin(ang)>0 ? 1 : 0.2));
+                let ex = mx + Math.sin(bAng)*len2, ey = my + Math.cos(bAng)*len2;
+                ctx.strokeStyle = skin; ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(ex, ey); ctx.stroke();
+                if(isLeg) { ctx.fillStyle = shoes; ctx.beginPath(); ctx.arc(ex + Math.sin(bAng)*3, ey+3, 5, 0, Math.PI*2); ctx.fill(); }
+            }
+            drawLimb(0, -60, aArm1, 15, 15, false); drawLimb(0, -35, aLeg1, 18, 18, true); 
+            ctx.strokeStyle = shirt; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(0, -60); ctx.lineTo(0, -35); ctx.stroke();
+            ctx.fillStyle = shorts; ctx.fillRect(-7, -38, 14, 10); 
+            ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(0, -75, 10, 0, Math.PI*2); ctx.fill(); 
+            drawLimb(0, -35, aLeg2, 18, 18, true); drawLimb(0, -60, aArm2, 15, 15, false); 
+            ctx.restore();
+        }
+
+        function drawCar(cx, cy, facing) {
+            ctx.save(); ctx.translate(cx, cy); ctx.scale(facing, 1);
+            let wAng = isPlaying ? charCycle * 2 : 0;
+            function drawWheel(wx, wy) {
+                ctx.save(); ctx.translate(wx, wy); ctx.rotate(wAng);
+                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#cbd5e1'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(-14,0); ctx.lineTo(14,0); ctx.moveTo(0,-14); ctx.lineTo(0,14); ctx.stroke();
+                ctx.restore();
+            }
+            ctx.fillStyle = '#0ea5e9'; ctx.beginPath();
+            ctx.moveTo(-45, -12); ctx.lineTo(50, -12); ctx.lineTo(55, -20); ctx.lineTo(25, -22); 
+            ctx.lineTo(5, -40); ctx.lineTo(-25, -40); ctx.lineTo(-50, -22); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#bae6fd'; ctx.beginPath();
+            ctx.moveTo(2, -37); ctx.lineTo(20, -22); ctx.lineTo(-20, -22); ctx.lineTo(-20, -37); ctx.closePath(); ctx.fill();
+            drawWheel(-28, -12); drawWheel(35, -12);
+            ctx.restore();
+        }
+
+        function drawJet(cx, cy, facing) {
+            ctx.save(); ctx.translate(cx, cy); ctx.scale(facing, 1);
+            if (Math.abs(v_current) > 10) {
+                ctx.fillStyle = Math.random() > 0.5 ? '#facc15' : '#ef4444';
+                ctx.beginPath(); ctx.moveTo(-60, -5); ctx.lineTo(-80 - Math.random()*30, -5); ctx.lineTo(-60, 5); ctx.fill();
+            }
+            ctx.fillStyle = '#64748b';
+            ctx.beginPath(); ctx.moveTo(-60, -12); ctx.lineTo(40, -12); 
+            ctx.quadraticCurveTo(75, -5, 85, 0); ctx.quadraticCurveTo(75, 5, 40, 5); 
+            ctx.lineTo(-60, 5); ctx.lineTo(-60, -12); ctx.fill();
+            ctx.fillStyle = '#475569';
+            ctx.beginPath(); ctx.moveTo(-15, 0); ctx.lineTo(15, 0); ctx.lineTo(-25, 30); ctx.lineTo(-40, 30); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-50, -12); ctx.lineTo(-35, -12); ctx.lineTo(-55, -45); ctx.lineTo(-70, -45); ctx.fill();
+            ctx.fillStyle = '#7dd3fc';
+            ctx.beginPath(); ctx.moveTo(25, 5); ctx.quadraticCurveTo(50, 5, 55, 0); ctx.lineTo(25, 0); ctx.fill();
+            ctx.restore();
+        }
+
+        // ------------------ NUEVO COMPONENTE: VELOCÍMETRO ------------------
+        function drawSpeedometer(speed_ms) {
+            ctx.save();
+            const kmh = speed_ms * 3.6;
+            
+            // Ubicación superior derecha
+            const cx = canvas.width - 120;
+            const cy = 110;
+            const radius = 55;
+            
+            // 1. Fondo de cristal para la tarjeta del velocímetro
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.beginPath();
+            ctx.roundRect(cx - 85, cy - 80, 170, 125, 15);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(203, 213, 225, 0.8)'; // border-slate-300
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // 2. Título
+            ctx.fillStyle = '#64748b'; // slate-500
+            ctx.font = 'bold 11px Poppins';
+            ctx.textAlign = 'center';
+            ctx.fillText('VELOCIDAD', cx, cy - 60);
+
+            // 3. Arco de fondo (Track)
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, Math.PI, 2 * Math.PI);
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#e2e8f0'; // slate-200
+            ctx.stroke();
+
+            // 4. Arco Activo (Gradiente)
+            const maxKmh = 1200; // Máxima velocidad representada en el arco (Jet)
+            let mappedSpeed = Math.min(kmh, maxKmh);
+            // Convertir velocidad a ángulo entre PI y 2*PI
+            let angle = Math.PI + (mappedSpeed / maxKmh) * Math.PI;
+            
+            let grad = ctx.createLinearGradient(cx - radius, cy, cx + radius, cy);
+            grad.addColorStop(0, '#3b82f6'); // Azul (coche)
+            grad.addColorStop(0.5, '#f59e0b'); // Naranja
+            grad.addColorStop(1, '#ef4444'); // Rojo (jet supersónico)
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, Math.PI, angle);
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = grad;
+            ctx.stroke();
+
+            // 5. Aguja indicadora
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            let nx = cx + Math.cos(angle) * (radius - 5);
+            let ny = cy + Math.sin(angle) * (radius - 5);
+            ctx.lineTo(nx, ny);
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#0f172a'; // slate-900
+            ctx.stroke();
+
+            // 6. Punto central de la aguja
+            ctx.beginPath();
+            ctx.arc(cx, cy, 6, 0, 2*Math.PI);
+            ctx.fillStyle = '#0f172a';
+            ctx.fill();
+
+            // 7. Texto Digital km/h
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 20px "JetBrains Mono", monospace';
+            ctx.fillText(`${Math.round(kmh)} km/h`, cx, cy + 28);
+
+            ctx.restore();
+        }
+
+        function drawFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawClouds(-x_current * 10); 
+
+            const trackY = canvas.height - 40;
+            ctx.fillStyle = '#475569'; 
+            ctx.fillRect(0, trackY, canvas.width, 40);
+            
+            const pxPerMeter = 12; 
+            const cameraX = canvas.width / 2; 
+            
+            let leftMeter = Math.floor(( -cameraX / pxPerMeter ) + x_current) - 5;
+            let rightMeter = Math.ceil(( (canvas.width - cameraX) / pxPerMeter ) + x_current) + 5;
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Inter';
+            ctx.textAlign = 'center';
+            for(let m = leftMeter; m <= rightMeter; m++) {
+                if(m % 10 === 0 && m >= 0) { 
+                    let drawX = cameraX + (m - x_current) * pxPerMeter;
+                    if (m === 0) {
+                        ctx.fillStyle = '#ef4444';
+                        ctx.fillRect(drawX - 4, trackY, 8, 40);
+                        ctx.fillStyle = 'white';
+                        ctx.fillText("INICIO", drawX, trackY + 20);
+                        ctx.fillText("0m", drawX, trackY + 35);
+                    } else {
+                        ctx.fillRect(drawX - 2, trackY, 4, 15);
+                        ctx.fillStyle = '#cbd5e1';
+                        ctx.fillText(m + 'm', drawX, trackY + 30);
+                        ctx.fillStyle = 'white';
+                    }
+                }
+            }
+
+            let speed = Math.abs(v_current);
+            drawSpeedLines(speed);
+
+            let facing = v_current > 0 ? 1 : (v_current < 0 ? -1 : (document.getElementById('dirFwd').checked ? 1 : -1));
+            
+            let groundY = trackY;
+            let skyY = 80;
+            let targetY = speed > 80 ? skyY : groundY;
+            
+            if (currentDrawY === 0) currentDrawY = groundY; 
+            currentDrawY += (targetY - currentDrawY) * 0.05;
+
+            let stateText = "";
+            if (speed <= 12) {
+                drawRunner(cameraX, currentDrawY, facing);
+                stateText = "🏃 CORREDOR";
+            } else if (speed > 12 && speed <= 80) {
+                drawCar(cameraX, currentDrawY, facing);
+                stateText = "🏎️ AUTO SPORT";
+            } else {
+                drawJet(cameraX, currentDrawY, facing);
+                stateText = "✈️ CAZA JET";
+            }
+            document.getElementById('hud_state').innerText = stateText;
+
+            // LLAMADA AL VELOCÍMETRO SI SUPERA LOS 12 M/S
+            if (speed > 12) {
+                drawSpeedometer(speed);
+            }
+        }
+
+        function triggerCollisionAlert() {
+            const alertEl = document.getElementById('collisionAlert');
+            alertEl.classList.remove('opacity-0');
+            setTimeout(() => { alertEl.classList.add('opacity-0'); }, 2000);
+        }
+
+        function update(timestamp) {
+            if (!isPlaying) return;
+            
+            if (!lastTime) lastTime = timestamp;
+            let dt = (timestamp - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1; 
+            lastTime = timestamp;
+
+            if (isGameMode) {
+                if (keys.ArrowRight) { a_current = GAME_ACCEL; } 
+                else if (keys.ArrowLeft) { a_current = -GAME_ACCEL; } 
+                else {
+                    if (Math.abs(v_current) < FRICTION * dt) { v_current = 0; a_current = 0; } 
+                    else { a_current = -Math.sign(v_current) * FRICTION; }
+                }
+            }
+
+            v_current += a_current * dt;
+            x_current += v_current * dt;
+            t_current += dt;
+
+            // COLISIÓN CON x=0
+            if (x_current <= 0) {
+                x_current = 0;
+                v_current = 0;
+                a_current = 0;
+                
+                if (t_current > 0.1) {
+                    t_current = 0; 
+                    resetSimData(false); 
+                    triggerCollisionAlert();
+                } else {
+                    t_current = 0; 
+                }
+            }
+
+            charCycle += Math.abs(v_current) * dt * 0.5;
+
+            if (!infiniteTime && t_current >= t_max) {
+                t_current = t_max;
+                isPlaying = false;
+                document.getElementById('btnPlay').innerText = "▶ Iniciar / Continuar";
+                document.getElementById('btnPlay').classList.replace('bg-amber-500', 'bg-sky-500');
+            }
+
+            syncPhysicsToUI();
+
+            if (t_current >= nextDataTime && t_current > 0) {
+                recordData(nextDataTime, x_current, v_current);
+                nextDataTime += 0.5;
+            }
+
+            drawFrame();
+            
+            if (isPlaying) animId = requestAnimationFrame(update);
+        }
+
+        function playPauseSim(forcePlay = false) {
+            const btn = document.getElementById('btnPlay');
+            
+            if (isPlaying && !forcePlay) {
+                isPlaying = false;
+                lastTime = null;
+                btn.innerText = "▶ Continuar";
+                btn.classList.replace('bg-amber-500', 'bg-sky-500');
+            } else {
+                if (!infiniteTime && t_current >= t_max) resetSimData(true); 
+                isPlaying = true;
+                btn.innerText = "⏸ Pausar";
+                btn.classList.replace('bg-sky-500', 'bg-amber-500');
+                
+                if (!isGameMode) {
+                    let dir = document.getElementById('dirFwd').checked ? 1 : -1;
+                    let accType = document.getElementById('accAccel').checked ? 1 : -1;
+                    
+                    x_current = parseFloat(document.getElementById('inp_x_num').value) || 0;
+                    v_current = (parseFloat(document.getElementById('inp_v_num').value) || 0) * dir;
+                    a_current = (parseFloat(document.getElementById('inp_a_num').value) || 0) * (dir * accType);
+                }
+
+                animId = requestAnimationFrame(update);
+            }
+        }
+
+        function stopSim() {
+            isPlaying = false;
+            resetSimData(true);
+            uiUpdateManual('x');
+            const btn = document.getElementById('btnPlay');
+            btn.innerText = "▶ Iniciar / Continuar";
+            btn.classList.replace('bg-amber-500', 'bg-sky-500');
+        }
+
+        function resetSimData(resetX = false) {
+            t_current = 0; lastTime = null; nextDataTime = 0; charCycle = 0;
+            dataHistory = []; speedLines = []; currentDrawY = 0;
+            if (resetX) { x_current = 0; v_current = 0; a_current = 0; }
+            
+            document.querySelector('#dataTable tbody').innerHTML = "";
+            myChart.data.labels = []; myChart.data.datasets[0].data = [];
+            myChart.update();
+            
+            syncPhysicsToUI(); drawFrame();
+        }
+
+        function recordData(t, x, v) {
+            const tFix = Number(t.toFixed(2));
+            dataHistory.push({t: tFix, x: Number(x.toFixed(2)), v: Number(v.toFixed(2))});
+            
+            const tbody = document.querySelector('#dataTable tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="font-bold text-slate-800">${tFix}</td>
+                            <td class="${x < 0 ? 'text-red-500' : 'text-emerald-600'}">${x.toFixed(2)}</td>
+                            <td class="${v < 0 ? 'text-red-500' : 'text-sky-600'}">${Math.abs(v).toFixed(2)} ${v < 0 ? '(Atrás)' : ''}</td>`;
+            tbody.appendChild(tr);
+            
+            if(infiniteTime && tbody.children.length > 50) tbody.removeChild(tbody.firstChild);
+            tbody.parentElement.parentElement.scrollTop = tbody.parentElement.parentElement.scrollHeight;
+
+            myChart.data.labels.push(tFix);
+            myChart.data.datasets[0].data.push(Number(x.toFixed(2)));
+            if (infiniteTime && myChart.data.labels.length > 50) {
+                myChart.data.labels.shift(); myChart.data.datasets[0].data.shift();
+            }
+            myChart.update();
+        }
+
+        const ctxChart = document.getElementById('graphCanvas').getContext('2d');
+        const myChart = new Chart(ctxChart, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Posición x(t)', data: [], borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.15)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 2 }] },
+            options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#f1f5f9' }, title: { display: true, text: 'Tiempo (s)' } }, y: { min: 0, grid: { color: '#f1f5f9' }, title: { display: true, text: 'Posición (m) >= 0' } } } }
+        });
+
+        function exportCSV() {
+            if(dataHistory.length === 0) return alert("Ejecuta la simulación primero.");
+            let csv = "data:text/csv;charset=utf-8,Tiempo(s),Posicion(m),Velocidad(m/s)\n";
+            dataHistory.forEach(r => csv += `${r.t},${r.x},${r.v}\n`);
+            let link = document.createElement("a"); link.href = encodeURI(csv); link.download = "MRUA_Live_Data.csv";
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        const banco = [
+            { q: "El MRUA se caracteriza porque su aceleración es:", o: ["Cero", "Constante y distinta de cero", "Variable"], a: 1 },
+            { q: "En la analogía del semáforo, si pisas el freno tu aceleración es:", o: ["Positiva a tu movimiento", "Contraria a tu movimiento (negativa)", "Cero"], a: 1 },
+            { q: "En MRUA, la gráfica Posición vs Tiempo forma una:", o: ["Línea recta", "Línea horizontal", "Parábola (curva)"], a: 2 },
+            { q: "La fórmula principal de posición es:", o: ["x = v·t", "x = x0 + v0·t + ½·a·t²", "v = d/t"], a: 1 },
+            { q: "¿Cuál es la unidad de aceleración en SI?", o: ["m/s", "m/s²", "N"], a: 1 },
+            { q: "Si la aceleración va en sentido contrario a la velocidad:", o: ["El objeto frena", "El objeto acelera más rápido", "Se detiene instantáneamente"], a: 0 },
+            { q: "La gráfica Velocidad vs Tiempo en MRUA es una:", o: ["Línea recta inclinada", "Parábola", "Línea horizontal"], a: 0 },
+            { q: "El área bajo la gráfica Velocidad vs Tiempo equivale a:", o: ["La aceleración", "El desplazamiento (distancia)", "El tiempo"], a: 1 },
+            { q: "La caída libre es un MRUA. La aceleración de la gravedad es aprox:", o: ["9.8 m/s²", "0 m/s²", "3.14 m/s²"], a: 0 },
+            { q: "Partir del reposo significa que:", o: ["x0 = 0", "a = 0", "v0 = 0"], a: 2 },
+            { q: "Ecuación independiente del tiempo:", o: ["vf² = v0² + 2a(x-x0)", "v = d/t", "a = v/t"], a: 0 },
+            { q: "Si aceleración y velocidad tienen el mismo signo:", o: ["Frenas", "Aumentas rapidez", "Te detienes"], a: 1 },
+            { q: "Velocidad final (vf) en función del tiempo se calcula como:", o: ["vf = v0 + a·t", "vf = x / t", "vf = a / t"], a: 0 },
+            { q: "Si vas de reversa y aceleras en esa misma dirección:", o: ["La rapidez aumenta", "La rapidez disminuye", "Te detienes"], a: 0 },
+            { q: "Si a = 0, el movimiento se convierte en:", o: ["Caída Libre", "MRU (Uniforme)", "Reposo absoluto"], a: 1 },
+            { q: "Fricción o desaceleración significa que:", o: ["La aceleración se opone al movimiento", "La aceleración siempre es menor a 0", "No hay aceleración"], a: 0 },
+            { q: "La aceleración mide la tasa de cambio de:", o: ["La posición", "La velocidad", "El tiempo"], a: 1 },
+            { q: "Si v0 = 10 y a = 2 por 3s. ¿vf?", o: ["16 m/s", "15 m/s", "12 m/s"], a: 0 },
+            { q: "La velocidad es vectorial porque:", o: ["Incluye tiempo", "Tiene magnitud y dirección", "Solo es un número"], a: 1 },
+            { q: "¿Qué letra representa la posición inicial?", o: ["x0", "t", "a"], a: 0 }
+        ];
+
+        let qActuales = [];
+
+        function generateQuiz() {
+            document.getElementById('btnEval').classList.remove('hidden');
+            document.getElementById('btnRetry').classList.add('hidden');
+            document.getElementById('btnNew').classList.add('hidden');
+            document.getElementById('quizResult').innerText = '';
+
+            let mezcladas = [...banco].sort(() => 0.5 - Math.random());
+            qActuales = mezcladas.slice(0, 5);
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const cont = document.getElementById('quizContainer');
+            cont.innerHTML = '';
+            qActuales.forEach((p, i) => {
+                let d = document.createElement('div');
+                d.className = 'bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition hover:shadow-md';
+                d.innerHTML = `<p class="font-bold text-slate-800 mb-4 flex items-start gap-2"><span class="bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-xs mt-0.5 shadow-sm">Q${i+1}</span> ${p.q}</p>`;
+                let g = document.createElement('div'); g.className = "space-y-3";
+                p.o.forEach((opt, oIdx) => {
+                    g.innerHTML += `<label id="l_${i}_${oIdx}" class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:bg-sky-50 transition">
+                        <input type="radio" name="q${i}" value="${oIdx}" class="w-4 h-4 text-sky-600 focus:ring-sky-500"> <span class="text-slate-700 text-sm font-medium">${opt}</span>
+                    </label>`;
+                });
+                d.appendChild(g); cont.appendChild(d);
+            });
+        }
+
+        function retryQuiz() {
+            document.getElementById('btnEval').classList.remove('hidden');
+            document.getElementById('btnRetry').classList.add('hidden');
+            document.getElementById('btnNew').classList.add('hidden');
+            document.getElementById('quizResult').innerText = '';
+            renderQuiz();
+        }
+
+        function evalQuiz() {
+            let score = 0, answered = 0;
+            qActuales.forEach((p, i) => { if(document.querySelector(`input[name="q${i}"]:checked`)) answered++; });
+            if (answered < 5) return alert("Por favor responde las 5 preguntas antes de calificar.");
+
+            qActuales.forEach((p, i) => {
+                let r = document.querySelector(`input[name="q${i}"]:checked`);
+                p.o.forEach((_, oi) => {
+                    let lbl = document.getElementById(`l_${i}_${oi}`);
+                    lbl.querySelector('input').disabled = true;
+                    lbl.classList.remove('quiz-correct', 'quiz-incorrect');
+                });
+
+                if(parseInt(r.value) === p.a) { score++; r.parentElement.classList.add('quiz-correct'); }
+                else {
+                    r.parentElement.classList.add('quiz-incorrect');
+                    document.getElementById(`l_${i}_${p.a}`).classList.add('quiz-correct');
+                }
+            });
+
+            let res = document.getElementById('quizResult');
+            res.innerText = `Puntuación: ${score} / 5 (${(score/5)*100}%)`;
+            res.className = `text-2xl font-black ${score >= 4 ? 'text-emerald-600' : score >=3 ? 'text-amber-500' : 'text-red-500'}`;
+            
+            document.getElementById('btnEval').classList.add('hidden');
+            document.getElementById('btnRetry').classList.remove('hidden');
+            document.getElementById('btnNew').classList.remove('hidden');
+        }
+
+        // --- INICIALIZACIÓN ---
+        uiUpdateManual('x');
+        drawFrame();
+        generateQuiz();
+    </script>
+</body>
+</html>

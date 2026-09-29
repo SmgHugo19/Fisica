@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Tiro Parabólico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-tab.active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow">
+            <h1 class="text-3xl font-extrabold text-blue-700">Física: Tiro Parabólico</h1>
+            <div class="text-sm text-gray-500 font-medium">Autor: <span class="text-gray-800">Hugo Omar Gamez Arroyo</span></div>
+        </header>
+
+        <!-- Navegación de Pestañas -->
+        <nav class="flex border-b border-gray-300 mb-6 bg-white rounded-t-lg px-4 pt-4 shadow-sm">
+            <button class="nav-tab active px-4 py-2 mr-2 hover:bg-gray-50 focus:outline-none" onclick="switchTab('teoria')">Teoría</button>
+            <button class="nav-tab px-4 py-2 mr-2 hover:bg-gray-50 focus:outline-none" onclick="switchTab('simulacion')">Simulación</button>
+            <button class="nav-tab px-4 py-2 hover:bg-gray-50 focus:outline-none" onclick="switchTab('evaluacion')">Evaluación</button>
+        </nav>
+
+        <!-- Pestaña 1: Teoría -->
+        <div id="teoria" class="tab-content active bg-white p-6 rounded-b-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">Fundamentos del Tiro Parabólico</h2>
+            <p class="mb-6 text-gray-700 leading-relaxed">
+                El tiro parabólico es un movimiento que resulta de la combinación de dos movimientos independientes: un movimiento rectilíneo uniforme (MRU) en su componente horizontal y un movimiento vertical rectilíneo uniformemente acelerado (MRUA) afectado por la gravedad. El resultado de esta composición es una trayectoria en forma de parábola.
+            </p>
+            
+            <h3 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Ecuaciones Fundamentales</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-gray-50 p-4 rounded border border-gray-200 shadow-sm">
+                    <h4 class="font-bold text-gray-700 mb-2">Componentes de Velocidad</h4>
+                    <p class="mb-1 text-lg">v<sub>0x</sub> = v<sub>0</sub> · cos(θ)</p>
+                    <p class="text-lg">v<sub>0y</sub> = v<sub>0</sub> · sin(θ)</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded border border-gray-200 shadow-sm">
+                    <h4 class="font-bold text-gray-700 mb-2">Posición en el tiempo (x, y)</h4>
+                    <p class="mb-1 text-lg">x(t) = v<sub>0x</sub> · t</p>
+                    <p class="text-lg">y(t) = h + v<sub>0y</sub> · t - ½ g · t²</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded border border-gray-200 shadow-sm">
+                    <h4 class="font-bold text-gray-700 mb-2">Tiempo de Vuelo y Altura Máxima</h4>
+                    <p class="mb-1 text-lg">t<sub>vuelo</sub> = [v<sub>0y</sub> + √(v<sub>0y</sub>² + 2gh)] / g</p>
+                    <p class="text-lg">y<sub>max</sub> = h + (v<sub>0y</sub>² / 2g)</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded border border-gray-200 shadow-sm">
+                    <h4 class="font-bold text-gray-700 mb-2">Alcance Máximo</h4>
+                    <p class="text-lg">x<sub>max</sub> = v<sub>0x</sub> · t<sub>vuelo</sub></p>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold mt-6 mb-4 text-gray-800 border-b pb-2">Nomenclatura (Significado de las variables)</h3>
+            <ul class="list-disc pl-6 space-y-3 text-gray-700">
+                <li><strong class="text-blue-700">v<sub>0</sub></strong>: <b>Velocidad inicial.</b> Es la magnitud de la velocidad con la que se lanza el proyectil. Se mide en metros por segundo (m/s).</li>
+                <li><strong class="text-blue-700">θ (Theta)</strong>: <b>Ángulo de lanzamiento.</b> Ángulo respecto al eje horizontal con el que el proyectil inicia su vuelo. Se mide en grados (°) o radianes.</li>
+                <li><strong class="text-blue-700">v<sub>0x</sub></strong>: <b>Velocidad inicial en X.</b> Componente horizontal de la velocidad. Este valor es constante durante todo el vuelo (porque no hay aceleración en X).</li>
+                <li><strong class="text-blue-700">v<sub>0y</sub></strong>: <b>Velocidad inicial en Y.</b> Componente vertical de la velocidad. Cambia constantemente por efecto de la gravedad.</li>
+                <li><strong class="text-blue-700">x(t)</strong>: <b>Posición horizontal.</b> Distancia recorrida en el eje X en un tiempo <i>t</i> determinado. Se mide en metros (m).</li>
+                <li><strong class="text-blue-700">y(t)</strong>: <b>Posición vertical.</b> Altura del proyectil en el eje Y en un tiempo <i>t</i> determinado. Se mide en metros (m).</li>
+                <li><strong class="text-blue-700">t</strong>: <b>Tiempo.</b> Segundos transcurridos desde el momento del lanzamiento (s).</li>
+                <li><strong class="text-blue-700">h</strong> (o y<sub>0</sub>): <b>Altura inicial.</b> Altura desde el nivel del suelo donde se encuentra el cañón al momento del disparo (m).</li>
+                <li><strong class="text-blue-700">g</strong>: <b>Gravedad.</b> Aceleración vertical hacia abajo provocada por la gravedad de la Tierra (usualmente 9.81 m/s²).</li>
+                <li><strong class="text-blue-700">t<sub>vuelo</sub></strong>: <b>Tiempo total de vuelo.</b> El tiempo que el objeto tarda desde el lanzamiento hasta impactar en el suelo.</li>
+                <li><strong class="text-blue-700">y<sub>max</sub></strong>: <b>Altura máxima.</b> El punto más alto que logra alcanzar el proyectil en su trayectoria.</li>
+                <li><strong class="text-blue-700">x<sub>max</sub></strong>: <b>Alcance máximo.</b> Distancia horizontal total recorrida desde el punto de lanzamiento hasta chocar contra el suelo.</li>
+            </ul>
+        </div>
+
+        <!-- Pestaña 2: Simulación -->
+        <div id="simulacion" class="tab-content bg-white p-6 rounded-b-lg shadow-md">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Panel de Control -->
+                <div class="w-full lg:w-1/3 bg-gray-50 p-4 rounded-lg shadow-inner border border-gray-200">
+                    <h3 class="text-lg font-bold mb-4 border-b pb-2">Panel de Control</h3>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Velocidad Inicial (m/s): <span id="valVel">20</span></label>
+                        <input type="range" id="inpVel" min="1" max="50" value="20" class="w-full" oninput="updateControls()">
+                        <input type="number" id="numVel" min="1" max="50" value="20" class="w-full mt-1 border rounded p-1" oninput="syncControl('numVel', 'inpVel'); updateControls()">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Ángulo (grados): <span id="valAng">45</span></label>
+                        <input type="range" id="inpAng" min="0" max="90" value="45" class="w-full" oninput="updateControls(); drawStaticCannon()">
+                        <input type="number" id="numAng" min="0" max="90" value="45" class="w-full mt-1 border rounded p-1" oninput="syncControl('numAng', 'inpAng'); updateControls(); drawStaticCannon()">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Altura Inicial (m): <span id="valAlt">0</span></label>
+                        <input type="range" id="inpAlt" min="0" max="50" value="0" class="w-full" oninput="updateControls(); drawStaticCannon()">
+                        <input type="number" id="numAlt" min="0" max="50" value="0" class="w-full mt-1 border rounded p-1" oninput="syncControl('numAlt', 'inpAlt'); updateControls(); drawStaticCannon()">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">Gravedad (m/s²): <span id="valGrav">9.81</span></label>
+                        <input type="range" id="inpGrav" min="1" max="25" step="0.1" value="9.81" class="w-full" oninput="updateControls()">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-1">Proyectil:</label>
+                        <select id="projectileType" class="w-full border rounded p-2 bg-white">
+                            <option value="random">🎲 Aleatorio</option>
+                            <option value="⚽">⚽ Balón</option>
+                            <option value="🍎">🍎 Manzana</option>
+                            <option value="🐦">🐦 Pájaro Enojado</option>
+                            <option value="🐶">🐶 Perro</option>
+                            <option value="🧼">🧼 Jabón</option>
+                            <option value="🥚">🥚 Huevo</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button onclick="startSimulation()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1">▶ Disparar</button>
+                        <button onclick="pauseSimulation()" id="btnPause" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded flex-1" disabled>⏸ Pausar</button>
+                        <button onclick="resetSimulation()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex-1">⏹ Detener</button>
+                    </div>
+                    
+                    <button onclick="exportCSV()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">📥 Exportar Datos (CSV)</button>
+                </div>
+
+                <!-- Canvas y Gráficos -->
+                <div class="w-full lg:w-2/3 flex flex-col gap-4">
+                    <div class="border-2 border-gray-300 rounded relative bg-blue-50" style="height: 400px; overflow: hidden;">
+                        <canvas id="simCanvas" width="800" height="400" class="w-full h-full bg-blue-50"></canvas>
+                        
+                        <!-- HUD de métricas en tiempo real -->
+                        <div class="absolute top-2 right-2 bg-white/90 p-3 rounded border text-sm shadow-md">
+                            <p class="font-bold text-gray-700 border-b pb-1 mb-1">Datos en vivo</p>
+                            <p>T. Vuelo: <span id="hudTime" class="font-mono font-bold text-blue-600">0.00</span> s</p>
+                            <p>Distancia (x): <span id="hudX" class="font-mono font-bold text-blue-600">0.00</span> m</p>
+                            <p>Altura (y): <span id="hudY" class="font-mono font-bold text-blue-600">0.00</span> m</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-4 border rounded shadow-inner" style="height: 300px;">
+                        <canvas id="chartCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla de datos -->
+            <div class="mt-6 h-64 overflow-y-auto border rounded shadow-inner bg-white">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th class="p-2 border">Tiempo (s)</th>
+                            <th class="p-2 border">Posición X (m)</th>
+                            <th class="p-2 border">Posición Y (m)</th>
+                            <th class="p-2 border">Velocidad X (m/s)</th>
+                            <th class="p-2 border">Velocidad Y (m/s)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pestaña 3: Evaluación -->
+        <div id="evaluacion" class="tab-content bg-white p-6 rounded-b-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">Evaluación de Conocimientos</h2>
+            <p class="mb-4">Responde las siguientes 5 preguntas aleatorias. Al finalizar, haz clic en calificar.</p>
+            <div id="quizContainer" class="space-y-6"></div>
+            <div class="mt-6">
+                <button onclick="gradeQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">Calificar</button>
+                <button onclick="generateQuiz()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded ml-2">Nuevo Intento</button>
+            </div>
+            <div id="quizResult" class="mt-4 text-xl font-bold"></div>
+        </div>
+    </div>
+
+    <!-- Script de Lógica -->
+    <script>
+        // ------------------ NAVEGACIÓN ------------------
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // ------------------ VARIABLES GLOBALES DE SIMULACIÓN ------------------
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        let animFrame;
+        let isRunning = false;
+        let isPaused = false;
+        
+        // Parámetros de física
+        let t = 0;
+        let v0, angle, h0, g;
+        let v0x, v0y;
+        
+        // Variables para la cámara (desplazamiento)
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Escalado para dibujar (m a pixeles)
+        const scale = 5; 
+        const groundY = canvas.height - 30; // Nivel base del suelo en el canvas
+        
+        // Historial y Rastros
+        let dataPoints = [];
+        let previousPath = []; // Guarda objetos {x, y} de la física real
+        
+        // Proyectil
+        const emojis = ["⚽", "🍎", "🐦", "🐶", "🧼", "🥚", "🏀", "🍔", "🛸", "👾"];
+        let currentEmoji = "⚽";
+
+        // Gráfica (Chart.js)
+        let simChart;
+        initChart();
+
+        // ------------------ ACTUALIZACIÓN DE CONTROLES ------------------
+        function syncControl(idFrom, idTo) {
+            document.getElementById(idTo).value = document.getElementById(idFrom).value;
+        }
+
+        function updateControls() {
+            document.getElementById('valVel').innerText = document.getElementById('inpVel').value;
+            document.getElementById('valAng').innerText = document.getElementById('inpAng').value;
+            document.getElementById('valAlt').innerText = document.getElementById('inpAlt').value;
+            document.getElementById('valGrav').innerText = document.getElementById('inpGrav').value;
+            
+            document.getElementById('numVel').value = document.getElementById('inpVel').value;
+            document.getElementById('numAng').value = document.getElementById('inpAng').value;
+            document.getElementById('numAlt').value = document.getElementById('inpAlt').value;
+        }
+
+        // ------------------ SELECCIÓN DE PROYECTIL ------------------
+        function getProjectileEmoji() {
+            const selector = document.getElementById('projectileType').value;
+            if (selector === 'random') {
+                return emojis[Math.floor(Math.random() * emojis.length)];
+            }
+            return selector;
+        }
+
+        // ------------------ DIBUJO Y CÁMARA ------------------
+        function drawStaticCannon() {
+            if (isRunning) return; // No dibujar estático si la simulación corre
+            
+            // Reiniciar cámara
+            offsetX = 0;
+            offsetY = 0;
+
+            let tempAng = document.getElementById('inpAng').value * (Math.PI / 180);
+            let tempH = parseFloat(document.getElementById('inpAlt').value);
+            let cannonBaseY = groundY - (tempH * scale);
+            
+            drawScene(tempAng, cannonBaseY, null);
+        }
+
+        function drawScene(angRad, cannonBaseY, projCoords) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 1. Dibujar Cielo
+            ctx.fillStyle = '#60a5fa'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height); 
+            
+            // 2. Dibujar Suelo (considerando el offsetY de la cámara)
+            let currentGroundY = groundY + offsetY;
+            if (currentGroundY < canvas.height) {
+                ctx.fillStyle = '#22c55e';
+                ctx.fillRect(0, currentGroundY, canvas.width, canvas.height - currentGroundY);
+            }
+
+            // 3. Dibujar trayectoria anterior
+            drawPreviousPath();
+
+            // 4. Dibujar trayectoria actual
+            drawCurrentPath();
+
+            // 5. Dibujar Cañón
+            drawCannon(30 - offsetX, cannonBaseY, angRad, currentGroundY);
+
+            // 6. Dibujar Proyectil si existe
+            if (projCoords) {
+                ctx.font = "24px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(currentEmoji, projCoords.cx, projCoords.cy);
+            }
+        }
+
+        function drawCannon(x, y, angRad, ground_Y) {
+            ctx.save();
+            // Rueda/Base
+            ctx.fillStyle = "#333";
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Soporte si hay altura y es visible sobre el suelo
+            if (y < ground_Y) {
+                ctx.strokeStyle = "#555";
+                ctx.lineWidth = 10;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x, ground_Y);
+                ctx.stroke();
+            }
+
+            // Tubo del cañón
+            ctx.translate(x, y);
+            ctx.rotate(-angRad); // Rotación negativa porque el Y en canvas va hacia abajo
+            
+            ctx.fillStyle = "#475569"; // Color metal
+            ctx.fillRect(0, -10, 40, 20); // Tubo
+            ctx.fillStyle = "#1e293b";
+            ctx.fillRect(35, -12, 10, 24); // Boca del cañón
+            
+            ctx.restore();
+        }
+
+        function drawPreviousPath() {
+            if (previousPath.length > 0) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.7)"; 
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 2;
+                
+                let startX = 30 + (previousPath[0].x * scale) - offsetX;
+                let startY = groundY - (previousPath[0].y * scale) + offsetY;
+                ctx.moveTo(startX, startY);
+                
+                for (let i = 1; i < previousPath.length; i++) {
+                    let px = 30 + (previousPath[i].x * scale) - offsetX;
+                    let py = groundY - (previousPath[i].y * scale) + offsetY;
+                    ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        function drawCurrentPath() {
+            if (dataPoints.length > 0) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 2;
+
+                let startX = 30 + (dataPoints[0].x * scale) - offsetX;
+                let startY = groundY - (dataPoints[0].y * scale) + offsetY;
+                ctx.moveTo(startX, startY);
+
+                for (let i = 1; i < dataPoints.length; i++) {
+                    let px = 30 + (dataPoints[i].x * scale) - offsetX;
+                    let py = groundY - (dataPoints[i].y * scale) + offsetY;
+                    ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        // ------------------ MOTOR DE SIMULACIÓN ------------------
+        function startSimulation() {
+            if (isPaused) {
+                isPaused = false;
+                document.getElementById('btnPause').innerText = "⏸ Pausar";
+                animate();
+                return;
+            }
+            
+            // Limpiar simulación anterior
+            cancelAnimationFrame(animFrame);
+            if (dataPoints.length > 0) {
+                previousPath = dataPoints.map(p => ({x: p.x, y: p.y}));
+            }
+            dataPoints = [];
+            t = 0;
+            offsetX = 0;
+            offsetY = 0;
+            document.getElementById('dataTableBody').innerHTML = '';
+            
+            // Nuevos valores
+            v0 = parseFloat(document.getElementById('inpVel').value);
+            angle = document.getElementById('inpAng').value * (Math.PI / 180);
+            h0 = parseFloat(document.getElementById('inpAlt').value);
+            g = parseFloat(document.getElementById('inpGrav').value);
+            
+            v0x = v0 * Math.cos(angle);
+            v0y = v0 * Math.sin(angle);
+            
+            currentEmoji = getProjectileEmoji();
+
+            // Limpiar gráfica
+            simChart.data.labels = [];
+            simChart.data.datasets[0].data = [];
+            simChart.update();
+
+            isRunning = true;
+            isPaused = false;
+            document.getElementById('btnPause').disabled = false;
+            document.getElementById('btnPause').innerText = "⏸ Pausar";
+            
+            animate();
+        }
+
+        function pauseSimulation() {
+            if (!isRunning) return;
+            isPaused = !isPaused;
+            if (isPaused) {
+                cancelAnimationFrame(animFrame);
+                document.getElementById('btnPause').innerText = "▶ Reanudar";
+            } else {
+                document.getElementById('btnPause').innerText = "⏸ Pausar";
+                animate();
+            }
+        }
+
+        function resetSimulation() {
+            cancelAnimationFrame(animFrame);
+            if (dataPoints.length > 0 && isRunning) {
+                previousPath = dataPoints.map(p => ({x: p.x, y: p.y}));
+            }
+            isRunning = false;
+            isPaused = false;
+            document.getElementById('btnPause').disabled = true;
+            t = 0;
+            updateControls();
+            drawStaticCannon(); // Esto reseteará la cámara
+            document.getElementById('hudTime').innerText = "0.00";
+            document.getElementById('hudX').innerText = "0.00";
+            document.getElementById('hudY').innerText = "0.00";
+        }
+
+        function animate() {
+            if (!isRunning || isPaused) return;
+
+            // Calcular físicas reales
+            let x = v0x * t;
+            let y = h0 + (v0y * t) - (0.5 * g * t * t);
+            let vy = v0y - (g * t);
+            
+            if (y < 0) {
+                y = 0;
+                isRunning = false;
+                document.getElementById('btnPause').disabled = true;
+            }
+
+            // Coordenadas RAW (sin offset de cámara)
+            let rawCX = 30 + (x * scale);
+            let rawCY = groundY - (y * scale);
+            
+            // ACTUALIZACIÓN DE CÁMARA (Panning)
+            const marginX = 200; // Margen para seguirlo en X
+            const marginTop = 100; // Margen superior
+            const marginBottom = 150; // Margen inferior
+            
+            // Si avanza a la derecha
+            if (rawCX - offsetX > canvas.width - marginX) {
+                offsetX = rawCX - (canvas.width - marginX);
+            }
+            
+            // Si sube mucho
+            if (rawCY + offsetY < marginTop) {
+                offsetY = marginTop - rawCY;
+            } 
+            // Si baja
+            else if (rawCY + offsetY > canvas.height - marginBottom) {
+                offsetY = (canvas.height - marginBottom) - rawCY;
+                if (offsetY < 0) offsetY = 0; // No permitir que la cámara baje más allá del suelo original
+            }
+
+            // Coordenadas FINALES con offset para dibujar
+            let cx = rawCX - offsetX;
+            let cy = rawCY + offsetY;
+
+            // Guardar datos
+            let dp = { t: t, x: x, y: y, vx: v0x, vy: vy };
+            dataPoints.push(dp);
+            
+            // Dibujar todo
+            let cannonBaseY = groundY - (h0 * scale) + offsetY;
+            drawScene(angle, cannonBaseY, {cx: cx, cy: cy});
+
+            // Actualizar HUD
+            document.getElementById('hudTime').innerText = t.toFixed(2);
+            document.getElementById('hudX').innerText = x.toFixed(2);
+            document.getElementById('hudY').innerText = y.toFixed(2);
+
+            // Actualizar Tabla y Gráfica
+            if (dataPoints.length % 5 === 0 || !isRunning) {
+                addTableRow(dp);
+                updateChart(dp);
+            }
+
+            if (isRunning) {
+                t += 0.05; // Ajuste de velocidad visual
+                animFrame = requestAnimationFrame(animate);
+            } else {
+                previousPath = dataPoints.map(p => ({x: p.x, y: p.y}));
+            }
+        }
+
+        // ------------------ TABLA Y GRÁFICA ------------------
+        function addTableRow(dp) {
+            const tr = document.createElement('tr');
+            tr.className = "border-b hover:bg-gray-50";
+            tr.innerHTML = `
+                <td class="p-2 border">${dp.t.toFixed(2)}</td>
+                <td class="p-2 border">${dp.x.toFixed(2)}</td>
+                <td class="p-2 border">${dp.y.toFixed(2)}</td>
+                <td class="p-2 border">${dp.vx.toFixed(2)}</td>
+                <td class="p-2 border">${dp.vy.toFixed(2)}</td>
+            `;
+            document.getElementById('dataTableBody').prepend(tr);
+        }
+
+        function initChart() {
+            const ctxChart = document.getElementById('chartCanvas').getContext('2d');
+            simChart = new Chart(ctxChart, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Trayectoria (Y vs X)',
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0,0,255,0.1)',
+                        data: [],
+                        fill: true,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Posición X (m)' } },
+                        y: { title: { display: true, text: 'Posición Y (m)' }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function updateChart(dp) {
+            simChart.data.labels.push(dp.x.toFixed(2));
+            simChart.data.datasets[0].data.push(dp.y.toFixed(2));
+            simChart.update();
+        }
+
+        function exportCSV() {
+            if (dataPoints.length === 0) {
+                alert("No hay datos para exportar. Ejecuta una simulación primero.");
+                return;
+            }
+            let csvContent = "data:text/csv;charset=utf-8,Tiempo(s),PosicionX(m),PosicionY(m),VelocidadX(m/s),VelocidadY(m/s)\n";
+            dataPoints.forEach(dp => {
+                csvContent += `${dp.t.toFixed(2)},${dp.x.toFixed(2)},${dp.y.toFixed(2)},${dp.vx.toFixed(2)},${dp.vy.toFixed(2)}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "datos_tiro_parabolico.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ------------------ SISTEMA DE EVALUACIÓN ------------------
+        const questionBank = [
+            { q: "¿Qué tipo de trayectoria describe un proyectil bajo la influencia de la gravedad?", o: ["Línea recta", "Parábola", "Círculo", "Elipse"], a: 1 },
+            { q: "¿En qué eje la velocidad de un proyectil permanece constante (ignorando el aire)?", o: ["Eje Y", "Eje Z", "Eje X", "En ninguno"], a: 2 },
+            { q: "¿Qué valor tiene la velocidad vertical en el punto de altura máxima?", o: ["9.8 m/s", "0 m/s", "Igual a la velocidad inicial", "-9.8 m/s"], a: 1 },
+            { q: "¿Con qué ángulo se logra el máximo alcance horizontal (a la misma altura inicial y final)?", o: ["30 grados", "45 grados", "60 grados", "90 grados"], a: 1 },
+            { q: "¿Qué componente de la velocidad cambia debido a la gravedad?", o: ["Vertical", "Horizontal", "Ambas", "Ninguna"], a: 0 },
+            { q: "La aceleración en el eje horizontal en un tiro parabólico ideal es:", o: ["9.8 m/s²", "-9.8 m/s²", "0 m/s²", "Depende del ángulo"], a: 2 },
+            { q: "Si se lanza un objeto verticalmente y otro horizontalmente desde la misma altura al mismo tiempo, ¿cuál cae primero?", o: ["El vertical", "El horizontal", "Ambos al mismo tiempo", "Depende de la masa"], a: 2 },
+            { q: "En la ecuación y(t) = h + v0y*t - 1/2*g*t², ¿qué representa la 'h'?", o: ["Gravedad", "Velocidad", "Tiempo", "Altura Inicial"], a: 3 },
+            { q: "¿Qué función trigonométrica se usa para calcular la componente horizontal de la velocidad inicial?", o: ["Seno", "Coseno", "Tangente", "Secante"], a: 1 },
+            { q: "¿Qué función trigonométrica se usa para calcular la componente vertical de la velocidad inicial?", o: ["Seno", "Coseno", "Tangente", "Cotangente"], a: 0 },
+            { q: "Si la velocidad inicial es 0, ¿qué tipo de movimiento es?", o: ["Caída libre", "Tiro horizontal", "Tiro parabólico", "Reposo"], a: 3 },
+            { q: "El tiempo de subida de un proyectil es igual al tiempo de bajada si:", o: ["La altura inicial y final son la misma", "Se lanza a 90 grados", "La masa es grande", "Siempre son iguales"], a: 0 },
+            { q: "La suma vectorial de la velocidad en X y en Y en cualquier momento nos da:", o: ["La aceleración", "La posición", "La velocidad real tangencial", "El alcance"], a: 2 },
+            { q: "¿Qué sucede con el alcance si aumentamos la masa del proyectil (ignorando fricción)?", o: ["Aumenta", "Disminuye", "No cambia", "Sube el doble"], a: 2 },
+            { q: "Un ángulo de 30° y uno de 60° con la misma velocidad inicial, ¿qué tienen en común?", o: ["Misma altura máxima", "Mismo tiempo de vuelo", "Mismo alcance horizontal", "Nada"], a: 2 },
+            { q: "¿Qué unidades tiene la constante de gravedad 'g'?", o: ["m/s", "m/s²", "kg*m/s", "N"], a: 1 },
+            { q: "¿Cómo es el movimiento en el eje Y de un proyectil?", o: ["Rectilíneo Uniforme", "Rectilíneo Uniformemente Acelerado", "Circular", "Armónico"], a: 1 },
+            { q: "¿Cómo es el movimiento en el eje X de un proyectil (ideal)?", o: ["Rectilíneo Uniforme", "Rectilíneo Uniformemente Acelerado", "Frenado", "Circular"], a: 0 },
+            { q: "Para que un proyectil caiga exactamente en el mismo punto de donde fue lanzado (R=0), el ángulo debe ser:", o: ["0°", "45°", "90°", "180°"], a: 2 },
+            { q: "El punto más alto de la trayectoria parabólica se conoce como:", o: ["Alcance", "Vértice o Altura Máxima", "Punto de impacto", "Origen"], a: 1 }
+        ];
+
+        let currentQuestions = [];
+
+        function generateQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = '';
+            document.getElementById('quizResult').innerHTML = '';
+            
+            let shuffled = questionBank.sort(() => 0.5 - Math.random());
+            currentQuestions = shuffled.slice(0, 5);
+            
+            currentQuestions.forEach((q, index) => {
+                let html = `<div class="p-4 border rounded bg-gray-50">
+                    <p class="font-bold mb-2">${index + 1}. ${q.q}</p>
+                    <div class="flex flex-col gap-1 pl-4">`;
+                
+                q.o.forEach((opt, optIdx) => {
+                    html += `<label class="cursor-pointer flex items-center">
+                        <input type="radio" name="q${index}" value="${optIdx}" class="mr-2">
+                        ${opt}
+                    </label>`;
+                });
+                
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        function gradeQuiz() {
+            let score = 0;
+            let answeredAll = true;
+            
+            currentQuestions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selected) {
+                    if (parseInt(selected.value) === q.a) {
+                        score++;
+                    }
+                } else {
+                    answeredAll = false;
+                }
+            });
+            
+            if (!answeredAll) {
+                alert("Por favor, responde todas las preguntas antes de calificar.");
+                return;
+            }
+            
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.innerHTML = `Tu calificación es: <span class="${score >= 3 ? 'text-green-600' : 'text-red-600'}">${score} / 5</span>`;
+        }
+
+        // ------------------ INICIALIZACIÓN ------------------
+        window.onload = () => {
+            updateControls();
+            drawStaticCannon();
+            generateQuiz();
+        };
+
+    </script>
+</body>
+</html>
