@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laboratorio Virtual de Óptica Geométrica — Hugo Omar Gámez Arroyo</title>
+<style>
+:root{--bg:#f2f5fb;--card:#fff;--ink:#1b2236;--mut:#5a6478;--pri:#3b5bdb;--acc:#e8590c;--bd:#dfe4f0;--ok:#2b8a3e;--bad:#c92a2a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1420;--card:#172033;--ink:#e8ecf6;--mut:#9aa6c0;--pri:#8ba4ff;--acc:#ffa94d;--bd:#2a3550;--ok:#69db7c;--bad:#ff8787}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:linear-gradient(135deg,#1c3faa,#5f3dc4);color:#fff;padding:22px 16px;text-align:center}
+header h1{margin:0;font-size:clamp(1.3rem,3.5vw,2rem)}
+header p{margin:6px 0 0;opacity:.92}
+nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5}
+nav button{border:0;background:transparent;color:var(--ink);padding:10px 18px;border-radius:999px;font-size:1rem;cursor:pointer;font-weight:600}
+nav button.on{background:var(--pri);color:#fff}
+main{max-width:1150px;margin:0 auto;padding:16px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.card h3{margin:0 0 6px;color:var(--pri)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}
+.eq{background:rgba(59,91,219,.09);border-left:4px solid var(--pri);padding:8px 12px;margin:8px 0;border-radius:6px;font:1.05rem Cambria,"Times New Roman",serif;overflow-x:auto}
+.sim{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(260px,1fr);gap:14px}
+@media(max-width:860px){.sim{grid-template-columns:1fr}}
+canvas{width:100%;height:auto;border-radius:12px;background:#0d1424;display:block}
+.ctl{margin-bottom:12px}.ctl label{display:flex;justify-content:space-between;font-weight:600;font-size:.92rem}
+.row{display:flex;gap:8px;align-items:center}.row input[type=range]{flex:1}
+input[type=number],select{width:84px;padding:5px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--ink)}
+select{width:100%;padding:9px;font-size:1rem}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.btn{flex:1;border:0;border-radius:10px;padding:10px 14px;font-weight:700;color:#fff;cursor:pointer;font-size:1rem}
+.b1{background:var(--ok)}.b2{background:#f08c00}.b3{background:var(--bad)}.b4{background:var(--pri)}
+#info{font:.92rem/1.6 ui-monospace,Menlo,monospace;background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:10px}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border:2px solid var(--bd);background:var(--bg);color:var(--ink);border-radius:10px;font-size:1rem;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--pri)}
+.opt.ok{border-color:var(--ok);background:rgba(43,138,62,.15)}.opt.no{border-color:var(--bad);background:rgba(201,42,42,.13)}
+.bar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden;margin-bottom:12px}.bar i{display:block;height:100%;background:var(--pri)}
+.score{font-size:2.4rem;font-weight:800;color:var(--pri)}
+footer{text-align:center;padding:20px;color:var(--mut);border-top:1px solid var(--bd);margin-top:20px}
+</style></head><body>
+<header><h1>🔬 Laboratorio Virtual de Óptica Geométrica</h1><p>Simulación desarrollada por <b>Hugo Omar Gámez Arroyo</b></p></header>
+<nav><button class="on" data-t="teoria">📘 Teoría</button><button data-t="sim">🧪 Simulador</button><button data-t="examen">📝 Examen</button></nav>
+<main>
+<section id="teoria" class="on"><div class="grid">
+<div class="card"><h3>1. Concepto de luz</h3><p>La luz es una onda electromagnética transversal (con comportamiento corpuscular: fotones) que se propaga incluso en el vacío. La luz visible abarca longitudes de onda de ≈ 380 a 750 nm. En óptica geométrica se modela como <b>rayos</b> rectilíneos mientras los obstáculos sean mucho mayores que λ.</p><div class="eq">c = λ · f &nbsp;&nbsp;&nbsp; E = h · f</div></div>
+<div class="card"><h3>2. Velocidad de la luz</h3><p>En el vacío es una constante universal; en un medio material es menor. El <b>índice de refracción</b> mide cuánto se reduce.</p><div class="eq">c = 299 792 458 m/s ≈ 3×10⁸ m/s</div><div class="eq">n = c / v &nbsp;⇒&nbsp; v = c / n</div></div>
+<div class="card"><h3>3. Reflexión y refracción</h3><p><b>Reflexión:</b> el rayo incidente, el reflejado y la normal están en un mismo plano y el ángulo de incidencia es igual al de reflexión. <b>Refracción:</b> al cambiar de medio el rayo se desvía según la ley de Snell.</p><div class="eq">θᵢ = θᵣ</div><div class="eq">n₁ · sen θ₁ = n₂ · sen θ₂</div><div class="eq">Ángulo crítico: sen θc = n₂ / n₁ &nbsp;(n₁ &gt; n₂)</div></div>
+<div class="card"><h3>4. Fibra óptica</h3><p>Guía la luz mediante <b>reflexión total interna</b>: el núcleo (n₁) tiene mayor índice que el revestimiento (n₂), y los rayos que inciden sobre la frontera con un ángulo mayor que θc quedan atrapados. Se usa en telecomunicaciones y endoscopía.</p><div class="eq">θc = arcsen(n₂ / n₁)</div><div class="eq">AN = sen θmáx = √(n₁² − n₂²)</div></div>
+<div class="card"><h3>5. Espejos</h3><p><b>Plano:</b> imagen virtual, derecha, del mismo tamaño y a igual distancia detrás del espejo. <b>Esféricos:</b> cóncavo (converge, f &gt; 0) y convexo (diverge, f &lt; 0); el foco está a la mitad del radio.</p><div class="eq">f = R / 2</div><div class="eq">1/f = 1/dₒ + 1/dᵢ &nbsp;&nbsp; m = −dᵢ/dₒ = hᵢ/hₒ</div></div>
+<div class="card"><h3>6. Lentes delgadas</h3><p><b>Convergente</b> (bordes delgados, f &gt; 0) hace converger rayos paralelos en el foco; <b>divergente</b> (bordes gruesos, f &lt; 0) los separa y forma imágenes virtuales, derechas y reducidas.</p><div class="eq">1/f = 1/dₒ + 1/dᵢ</div><div class="eq">1/f = (n − 1)(1/R₁ − 1/R₂) &nbsp; (ecuación del fabricante)</div><div class="eq">m = −dᵢ/dₒ &nbsp;&nbsp; P = 1/f (dioptrías)</div></div>
+<div class="card"><h3>7. El telescopio</h3><p>El <b>refractor</b> usa una lente objetivo de gran distancia focal y un ocular de focal corta. El <b>reflector</b> sustituye el objetivo por un espejo cóncavo primario. Forma una imagen angularmente mayor del objeto lejano.</p><div class="eq">M = − f<sub>obj</sub> / f<sub>oc</sub></div><div class="eq">Longitud del tubo ≈ f<sub>obj</sub> + f<sub>oc</sub></div></div>
+</div></section>
+
+<section id="sim"><div class="sim">
+<div><canvas id="cv" width="800" height="460"></canvas><div id="info"></div></div>
+<div class="card"><h3>Panel de control</h3>
+<div class="ctl"><label>Fenómeno / elemento</label><select id="mode">
+<option value="refraccion">Refracción (Snell)</option><option value="reflexion">Reflexión (espejo plano, ley)</option>
+<option value="lente-c">Lente convergente</option><option value="lente-d">Lente divergente</option>
+<option value="espejo-c">Espejo cóncavo</option><option value="espejo-v">Espejo convexo</option><option value="plano">Espejo plano (imagen)</option></select></div>
+<div id="ctls"></div>
+<div class="btns"><button class="btn b1" id="play">▶ Iniciar</button><button class="btn b2" id="pause">⏸ Pausar</button><button class="btn b3" id="stop">⏹ Detener</button></div>
+</div></div></section>
+
+<section id="examen"><div class="card" id="exbox"></div></section>
+</main>
+<footer>© Laboratorio Virtual de Óptica Geométrica · Autor de la simulación: <b>Hugo Omar Gámez Arroyo</b></footer>
+
+<script>
+const $=id=>document.getElementById(id);
+/* ---------- Pestañas ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  if(b.dataset.t==='examen')startExam();
+});
+/* ---------- Simulador ---------- */
+const cv=$('cv'),g=cv.getContext('2d'),W=800,H=460,C0=299792458;
+const S={n1:1,n2:1.5,ang:40,f:50,d:100,h:20,t:0,run:true};
+const defs=[['n1','Índice n₁ (medio 1)',1,2.5,.01,'r'],['n2','Índice n₂ (medio 2)',1,2.5,.01,'n2'],['ang','Ángulo de incidencia θ₁ (°)',0,89,1,'r'],
+['f','Distancia focal |f| (cm)',5,100,1,'f'],['d','Posición del objeto dₒ (cm)',10,150,1,'o'],['h','Altura del objeto hₒ (cm)',5,35,1,'o']];
+defs.forEach(([k,l,mn,mx,st,gr])=>{
+  const d=document.createElement('div');d.className='ctl';d.id='g-'+k;
+  d.innerHTML=`<label>${l}</label><div class="row"><input type="range" id="${k}r" min="${mn}" max="${mx}" step="${st}" value="${S[k]}"><input type="number" id="${k}n" min="${mn}" max="${mx}" step="${st}" value="${S[k]}"></div>`;
+  $('ctls').appendChild(d);
+  const r=$(k+'r'),n=$(k+'n');
+  r.oninput=()=>{S[k]=+r.value;n.value=r.value};
+  n.onchange=()=>{let v=parseFloat(n.value);if(isNaN(v))v=S[k];v=Math.min(mx,Math.max(mn,v));S[k]=v;n.value=v;r.value=v};
+});
+let mode='refraccion';
+function setMode(){
+  mode=$('mode').value;const R=mode==='refraccion'||mode==='reflexion',O=!R;
+  $('g-n1').style.display=$('g-ang').style.display=R?'':'none';
+  $('g-n2').style.display=mode==='refraccion'?'':'none';
+  $('g-f').style.display=(O&&mode!=='plano')?'':'none';
+  $('g-d').style.display=$('g-h').style.display=O?'':'none';
+  S.t=0;S.run=true;
+}
+$('mode').onchange=setMode;setMode();
+$('play').onclick=()=>{S.run=true};$('pause').onclick=()=>{S.run=false};$('stop').onclick=()=>{S.run=false;S.t=0};
+
+function poly(p,d,col,w=2.5,al=1){
+  let tot=0;for(let i=1;i<p.length;i++)tot+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);
+  g.save();g.globalAlpha=al;g.strokeStyle=col;g.fillStyle=col;g.lineWidth=w;g.shadowColor=col;g.shadowBlur=8;
+  g.beginPath();g.moveTo(p[0][0],p[0][1]);let r=d,hx=p[0][0],hy=p[0][1];
+  for(let i=1;i<p.length;i++){const[x0,y0]=p[i-1],[x1,y1]=p[i],l=Math.hypot(x1-x0,y1-y0);
+    if(r>=l){g.lineTo(x1,y1);r-=l;hx=x1;hy=y1}else{hx=x0+(x1-x0)*r/l;hy=y0+(y1-y0)*r/l;g.lineTo(hx,hy);break}}
+  g.stroke();if(d>0&&d<tot){g.beginPath();g.arc(hx,hy,5,0,7);g.fill()}g.restore();
+}
+function line(a,b,col,dash,w=1.5){g.save();g.strokeStyle=col;g.lineWidth=w;g.setLineDash(dash||[]);g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke();g.restore()}
+function txt(s,x,y,col='#cfd8f0',al='left'){g.fillStyle=col;g.font='13px system-ui,sans-serif';g.textAlign=al;g.fillText(s,x,y)}
+function arrow(x,y0,y1,col,dash){line([x,y0],[x,y1],col,dash,3);const u=y1<y0?1:-1;
+  g.fillStyle=col;g.beginPath();g.moveTo(x,y1);g.lineTo(x-6,y1+u*10);g.lineTo(x+6,y1+u*10);g.fill()}
+const rad=Math.PI/180,deg=180/Math.PI,f2=(x,n=2)=>(+x).toFixed(n);
+
+function drawRefr(refl){
+  const cx=W/2,cy=H/2,L=240,th=S.ang*rad,n1=S.n1,n2=refl?S.n1:S.n2;
+  g.fillStyle=`rgba(110,160,255,${.10+.07*(n1-1)})`;g.fillRect(0,0,W,cy);
+  if(refl){const gr=g.createLinearGradient(0,cy,0,H);gr.addColorStop(0,'#aab4c8');gr.addColorStop(1,'#4a5468');g.fillStyle=gr}
+  else g.fillStyle=`rgba(60,210,180,${.10+.10*(n2-1)})`;
+  g.fillRect(0,cy,W,H-cy);
+  txt(refl?'Aire (medio 1)':`Medio 1: n₁ = ${f2(n1)}`,12,22);txt(refl?'Superficie reflectante':`Medio 2: n₂ = ${f2(n2)}`,12,H-12);
+  line([cx,20],[cx,H-20],'#8d99b5',[6,5]);txt('normal',cx+6,34);line([0,cy],[W,cy],'#e9ecef',null,2);
+  const A=[cx-L*Math.sin(th),cy-L*Math.cos(th)];
+  const s2=n1*Math.sin(th)/n2;let out,th2=null,tir=false;
+  if(refl||s2>1){tir=!refl;out=[cx+L*Math.sin(th),cy-L*Math.cos(th)]}
+  else{th2=Math.asin(s2);out=[cx+L*Math.sin(th2),cy+L*Math.cos(th2)]}
+  poly([A,[cx,cy],out],S.t,'#ffd43b');
+  if(!refl&&!tir&&S.t>L)poly([[cx,cy],[cx+L*Math.sin(th),cy-L*Math.cos(th)]],S.t-L,'#ffd43b',1.5,.35);
+  g.strokeStyle='#ffd43b';g.lineWidth=1;g.beginPath();g.arc(cx,cy,50,-Math.PI/2-th,-Math.PI/2);g.stroke();txt('θ₁',cx-60*Math.sin(th)-26,cy-58*Math.cos(th),'#ffd43b');
+  if(th2!==null){g.strokeStyle='#63e6be';g.beginPath();g.arc(cx,cy,60,Math.PI/2-th2,Math.PI/2);g.stroke();txt('θ₂',cx+64*Math.sin(th2)/1.1+2,cy+68,'#63e6be')}
+  if(tir)txt('REFLEXIÓN TOTAL INTERNA',cx,cy+60,'#ff8787','center');
+  let h=`v₁ = c/n₁ = ${f2(C0/n1/1e8)}×10⁸ m/s<br>`;
+  if(refl)h+=`θ incidente = ${f2(S.ang,1)}° &nbsp; θ reflejado = ${f2(S.ang,1)}°`;
+  else{h+=`v₂ = c/n₂ = ${f2(C0/n2/1e8)}×10⁸ m/s<br>θ₁ = ${f2(S.ang,1)}° → θ₂ = ${tir?'— (RTI)':f2(th2*deg,1)+'°'}<br>`;
+    h+=n1>n2?`Ángulo crítico θc = ${f2(Math.asin(n2/n1)*deg,1)}°`:'θc: no existe (n₁ ≤ n₂)'}
+  $('info').innerHTML=h;return 600;
+}
+function drawOptics(m){
+  const isL=m.startsWith('lente'),s=3,cx=isL?420:580,cy=H/2;
+  const f=m==='plano'?1e9:(m.endsWith('-c')?S.f:-S.f);
+  const Px=cx-S.d*s,Py=cy-S.h*s;
+  let den=1/f-1/S.d;if(Math.abs(den)<1e-6)den=1e-6;let di=1/den;const inf=Math.abs(di)>3000;di=Math.max(-3000,Math.min(3000,di));
+  const Ix=isL?cx+di*s:cx-di*s,Iy=cy+(di/S.d)*S.h*s,real=di>0,sg=isL?1:-1;
+  line([0,cy],[W,cy],'#6b7690');
+  // elemento óptico
+  g.save();g.lineWidth=4;const hh=170;
+  if(isL){g.strokeStyle='#74c0fc';g.fillStyle='rgba(116,192,252,.18)';const k=f>0?1:-1;g.beginPath();
+    g.moveTo(cx,cy-hh);g.quadraticCurveTo(cx+k*18,cy,cx,cy+hh);g.quadraticCurveTo(cx-k*18,cy,cx,cy-hh);g.fill();g.stroke();
+    txt(f>0?'Lente convergente':'Lente divergente',cx,cy-hh-8,'#74c0fc','center')}
+  else{g.strokeStyle='#ced4da';const sag=Math.max(-40,Math.min(40,hh*hh/(4*f*s)));
+    g.beginPath();g.moveTo(cx-sag,cy-hh);g.quadraticCurveTo(cx+sag,cy,cx-sag,cy+hh);g.stroke();
+    g.lineWidth=1;for(let y=-hh;y<=hh;y+=14){const sx=cx-sag*(1-(y/hh)**2)+0;g.beginPath();g.moveTo(sx,cy+y);g.lineTo(sx+10,cy+y+10);g.stroke()}
+    txt(m==='plano'?'Espejo plano':f>0?'Espejo cóncavo':'Espejo convexo',cx,cy-hh-8,'#ced4da','center')}
+  g.restore();
+  if(m!=='plano'){const fx=cx-f*s;g.fillStyle='#ffa94d';[[fx,'F'],[isL?cx+f*s:cx-2*f*s,isL?'F′':'C']].forEach(([x,l])=>{g.beginPath();g.arc(x,cy,4,0,7);g.fill();txt(l,x,cy+18,'#ffa94d','center')})}
+  arrow(Px,cy,Py,'#ff8787');txt('Objeto',Px,cy+18,'#ff8787','center');
+  const unit=(a,b)=>{const l=Math.hypot(b[0]-a[0],b[1]-a[1])||1;return[(b[0]-a[0])/l,(b[1]-a[1])/l]};
+  const P=[Px,Py],I=[Ix,Iy],ext=(a,d)=>[a[0]+d[0]*1500,a[1]+d[1]*1500];
+  const F1x=cx-f*s,y3=Py+(cy-Py)*(cx-Px)/(F1x-Px);
+  const L1=[cx,Py],L3=[cx,y3],V=[cx,cy];
+  const dir=L=>real?unit(L,I):unit(I,L);
+  const d2=isL?unit(P,V):(()=>{const u=unit(P,V);return[-u[0],u[1]]})();
+  const R=[[[P,L1,ext(L1,dir(L1))],!real&&L1],[[P,V,ext(V,d2)],null],[[P,L3,[cx+sg*1500,y3]],!real&&L3]];
+  const cols=['#ffd43b','#69db7c','#da77f2'];
+  R.forEach(([pts,vd],i)=>{poly(pts,S.t,cols[i]);if(vd&&S.t>1000)line(vd,I,cols[i],[5,5],1.2)});
+  if(!inf&&S.t>0){const col=real?'#b197fc':'rgba(177,151,252,.6)';
+    if(S.t>500)arrow(Ix,cy,Iy,col,real?[]:[5,4]),txt(real?'Imagen real':'Imagen virtual',Ix,Iy>cy?Iy+26:Iy-16,'#b197fc','center')}
+  const mg=-di/S.d;
+  $('info').innerHTML=inf?`dᵢ → ∞ (el objeto está en el foco: rayos paralelos)`:
+   `f = ${f2(m==='plano'?Infinity:f,1)} cm &nbsp; dₒ = ${f2(S.d,1)} cm<br>dᵢ = ${f2(di,1)} cm &nbsp; m = ${f2(mg)}<br>Imagen: ${real?'real':'virtual'}, ${mg<0?'invertida':'derecha'}, ${Math.abs(mg)>1.005?'ampliada':Math.abs(mg)<.995?'reducida':'del mismo tamaño'}`;
+  return 1800;
+}
+let last=0;
+function loop(ts){
+  const dt=Math.min(50,ts-last)/1000;last=ts;
+  g.clearRect(0,0,W,H);g.fillStyle='#0d1424';g.fillRect(0,0,W,H);
+  const lim=mode==='refraccion'||mode==='reflexion'?drawRefr(mode==='reflexion'):drawOptics(mode);
+  if(S.run){S.t+=dt*(lim>1000?520:300);if(S.t>lim+80)S.t=0}
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- Examen ---------- */
+const Q=[
+["¿Cuál es el valor aproximado de la velocidad de la luz en el vacío?",["3×10⁶ m/s","3×10⁸ m/s","3×10¹⁰ m/s","3×10⁵ m/s"],1,"c ≈ 299 792 458 m/s ≈ 3×10⁸ m/s."],
+["¿Cuál es la velocidad de la luz en un vidrio con n = 1.5?",["4.5×10⁸ m/s","1.5×10⁸ m/s","3×10⁸ m/s","2×10⁸ m/s"],3,"v = c/n = 3×10⁸/1.5 = 2×10⁸ m/s."],
+["La ley de la reflexión establece que:",["θr es el doble de θi","θr depende del índice del medio","θi = θr, medidos respecto a la normal","El rayo reflejado es paralelo al incidente"],2,"El ángulo de incidencia es igual al de reflexión, ambos medidos desde la normal, y los tres rayos son coplanares."],
+["Un rayo pasa de aire (n=1) a agua (n=1.33) con θ₁ = 30°. ¿Cuál es θ₂?",["30°","40.5°","15.0°","22.1°"],3,"sen θ₂ = (1·sen30°)/1.33 = 0.376 → θ₂ ≈ 22.1°."],
+["¿Cuál es el ángulo crítico para luz que va de vidrio (n=1.5) a aire?",["48.2°","41.8°","33.7°","60.0°"],1,"θc = arcsen(1/1.5) ≈ 41.8°."],
+["La fibra óptica transmite luz principalmente gracias a:",["Dispersión","Polarización","Difracción","Reflexión total interna"],3,"El núcleo tiene mayor índice que el revestimiento y los rayos con θ > θc se reflejan totalmente."],
+["¿Cuándo ocurre la reflexión total interna?",["De un medio menos denso a uno más denso, con cualquier ángulo","De un medio más denso a uno menos denso con θ mayor al ángulo crítico","Solo con incidencia normal","Solo en espejos metálicos"],1,"Requiere n₁ > n₂ y θ₁ > θc."],
+["La imagen formada por un espejo plano es:",["Real, invertida y menor","Virtual, invertida y del mismo tamaño","Virtual, derecha y del mismo tamaño","Real, derecha y mayor"],2,"La imagen es virtual, derecha, de igual tamaño y está a la misma distancia detrás del espejo."],
+["Un espejo cóncavo (f = 20 cm) tiene un objeto a 60 cm. ¿A qué distancia se forma la imagen?",["12 cm","30 cm","15 cm","−30 cm"],1,"1/dᵢ = 1/20 − 1/60 = 1/30 → dᵢ = 30 cm (real, m = −0.5)."],
+["En un espejo esférico de radio R, la distancia focal es:",["f = R/2","f = 2R","f = R","f = R²"],0,"El foco está a la mitad del radio de curvatura: f = R/2."],
+["Un espejo convexo siempre produce una imagen:",["Real e invertida","Real y ampliada","Virtual, derecha y ampliada","Virtual, derecha y reducida"],3,"Los espejos convexos son divergentes: la imagen es virtual, derecha y reducida."],
+["Un objeto está más allá de 2f de una lente convergente. La imagen es:",["Virtual y derecha","Real, invertida y reducida","Real, invertida y ampliada","No se forma"],1,"Para dₒ > 2f la imagen cae entre f y 2f: real, invertida y reducida."],
+["La ecuación de las lentes delgadas es:",["1/f = 1/dₒ + 1/dᵢ","f = dₒ + dᵢ","f = dₒ·dᵢ","1/f = dₒ − dᵢ"],0,"1/f = 1/dₒ + 1/dᵢ."],
+["Una lente divergente (f = −10 cm) con objeto a 30 cm forma una imagen en dᵢ =",["+7.5 cm","+15 cm","−15 cm","−7.5 cm"],3,"1/dᵢ = −1/10 − 1/30 = −4/30 → dᵢ = −7.5 cm (virtual)."],
+["Si un objeto está en el foco de una lente convergente:",["La imagen es real a 2f","La imagen se forma en el infinito (rayos paralelos)","La imagen es virtual y ampliada","La imagen es del mismo tamaño"],1,"Con dₒ = f, 1/dᵢ = 0: los rayos emergen paralelos."],
+["Si m = −2, la imagen es:",["Derecha y reducida","Derecha y ampliada","Invertida y reducida","Invertida y del doble de tamaño"],3,"El signo negativo indica inversión y |m| = 2 indica ampliación al doble."],
+["Un telescopio con f_objetivo = 1200 mm y f_ocular = 25 mm tiene un aumento angular de:",["30×","24×","48×","1225×"],2,"M = f_obj/f_oc = 1200/25 = 48×."],
+["¿En qué se diferencia un telescopio reflector de un refractor?",["El reflector no tiene ocular","Ambos usan solo lentes","El reflector usa un espejo cóncavo primario y el refractor una lente objetivo","El refractor usa espejo primario"],2,"El reflector enfoca con un espejo cóncavo; el refractor con una lente objetivo."],
+["¿Qué es la luz?",["Una onda mecánica que necesita medio","Un flujo de electrones","Una onda electromagnética que se propaga en el vacío","Una onda sonora de alta frecuencia"],2,"La luz es radiación electromagnética (con dualidad onda-partícula) y no requiere medio material."],
+["Al pasar de aire a vidrio, un rayo de luz:",["Disminuye su velocidad y se acerca a la normal","Aumenta su velocidad y se aleja de la normal","Mantiene su velocidad y cambia su frecuencia","Disminuye su frecuencia"],0,"En un medio de mayor n la velocidad baja, la frecuencia no cambia y el rayo se acerca a la normal."]];
+let ex;
+function startExam(){
+  const idx=Q.map((_,i)=>i);for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
+  ex={qs:idx.slice(0,5),i:0,ans:[],done:false};renderEx();
+}
+function renderEx(){
+  const b=$('exbox');
+  if(ex.i>=5){
+    const sc=ex.ans.filter((a,k)=>a===Q[ex.qs[k]][2]).length,pct=sc*20;
+    const msg=sc===5?'¡Excelente! Dominas los conceptos.':sc>=4?'Muy bien, solo repasa un detalle.':sc>=3?'Aprobado: refuerza los temas fallados.':'Necesitas repasar la teoría y practicar en el simulador.';
+    b.innerHTML=`<h3>Resultado</h3><div class="score">${sc} / 5 &nbsp;(${pct}%)</div><p><b>${msg}</b></p>`+ex.qs.map((q,k)=>{const ok=ex.ans[k]===Q[q][2];
+      return `<div class="card"><b>${k+1}. ${Q[q][0]}</b><br>${ok?'✅':'❌'} Tu respuesta: ${Q[q][1][ex.ans[k]]}<br>${ok?'':'✔ Correcta: '+Q[q][1][Q[q][2]]+'<br>'}<small>💡 ${Q[q][3]}</small></div>`}).join('')+`<button class="btn b4" id="again">🔄 Nuevo examen</button>`;
+    $('again').onclick=startExam;return;
+  }
+  const q=Q[ex.qs[ex.i]];
+  b.innerHTML=`<h3>Examen — Pregunta ${ex.i+1} de 5</h3><div class="bar"><i style="width:${ex.i*20}%"></i></div><p><b>${q[0]}</b></p>`+
+    q[1].map((o,k)=>`<button class="opt" data-k="${k}">${'ABCD'[k]}) ${o}</button>`).join('')+`<div id="fb"></div>`;
+  b.querySelectorAll('.opt').forEach(btn=>btn.onclick=()=>{
+    const k=+btn.dataset.k;ex.ans[ex.i]=k;
+    b.querySelectorAll('.opt').forEach((x,j)=>{x.disabled=true;if(j===q[2])x.classList.add('ok');else if(j===k)x.classList.add('no')});
+    $('fb').innerHTML=`<p>${k===q[2]?'✅ ¡Correcto!':'❌ Incorrecto.'} ${q[3]}</p><button class="btn b4" id="nx">${ex.i<4?'Siguiente →':'Ver calificación'}</button>`;
+    $('nx').onclick=()=>{ex.i++;renderEx()};
+  });
+}
+</script></body></html>
