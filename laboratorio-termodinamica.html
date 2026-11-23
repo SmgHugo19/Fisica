@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio Virtual de Termodinámica</title>
+<style>
+:root{--bg:#eef2f7;--card:#fff;--tx:#14213d;--mu:#5a6781;--bd:#d6dde9;--ac:#e8590c;--ac2:#1971c2;--ok:#2b8a3e;--er:#c92a2a;--eq:#fff1e6;--hd:#14213d}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1524;--card:#17213a;--tx:#e6ecf8;--mu:#9aa8c4;--bd:#2a3858;--ac:#ff922b;--ac2:#74c0fc;--ok:#69db7c;--er:#ff8787;--eq:#2b2335;--hd:#0a101d}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.6 system-ui,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+h1,h2,h3{font-family:"Iowan Old Style",Georgia,"Times New Roman",serif;font-weight:700}
+header{background:var(--hd);color:#fff;padding:22px 0 0;border-bottom:6px solid;border-image:linear-gradient(90deg,#1c7ed6,#74c0fc,#ffd43b,#ff922b,#e03131) 1}
+.w{max-width:1100px;margin:auto;padding:0 14px}
+header h1{margin:0;font-size:clamp(1.5rem,4.5vw,2.2rem);line-height:1.2}
+header p{margin:6px 0 16px;color:#c5d0e6}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:transparent;color:#c5d0e6;border:0;padding:10px 16px;border-radius:10px 10px 0 0;font:inherit;cursor:pointer}
+nav button:hover{background:rgba(255,255,255,.1)}
+nav button.on{background:var(--bg);color:var(--tx);font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--ac2);outline-offset:2px}
+main{padding:18px 0 30px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.cols{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(310px,1fr))}
+.cols .card{margin:0}
+h2{margin:.1em 0 .5em;font-size:1.3rem}h3{margin:.8em 0 .3em;font-size:1.05rem;color:var(--ac)}
+p{margin:.5em 0}
+.eq{background:var(--eq);border-left:4px solid var(--ac);padding:8px 12px;border-radius:6px;margin:8px 0;font:1.1rem Cambria,Georgia,serif;overflow-x:auto}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 4px;font-size:.95em}
+.fr>span:first-child{border-bottom:1px solid currentColor;padding:0 4px}
+table{border-collapse:collapse;width:100%;font-size:.9rem}td,th{border-bottom:1px solid var(--bd);padding:5px 8px;text-align:left}
+.sim{display:grid;gap:14px;grid-template-columns:minmax(270px,340px) 1fr;align-items:start}
+.sim>div{min-width:0}.sim .card{margin-bottom:14px}
+@media(max-width:820px){.sim{grid-template-columns:1fr}}
+.f{margin-bottom:10px}.f label{display:flex;justify-content:space-between;gap:8px;font-size:.86rem;color:var(--mu)}
+.r{display:flex;gap:8px;align-items:center}.r input[type=range]{flex:1;min-width:0;accent-color:var(--ac)}
+input[type=number],input[type=text],select{width:100%;padding:7px 9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.r input[type=number]{width:96px}
+input.bad{border-color:var(--er);outline:2px solid var(--er)}
+#warn{display:none;margin-top:8px;padding:8px 12px;border:1px solid var(--er);border-radius:8px;background:color-mix(in srgb,var(--er) 12%,var(--card));font-size:.88rem}
+#warn ul{margin:4px 0 0;padding-left:18px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.btn{padding:9px 16px;border:0;border-radius:8px;background:var(--ac2);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.o{background:var(--ac);color:#1b1b1b}.btn.s{background:var(--bd);color:var(--tx)}
+:root:not(.x) .btn{color:#fff}.btn.o{color:#1b1b1b}.btn.s{color:var(--tx)}
+canvas{width:100%;height:380px;display:block;touch-action:pan-y}
+.ro{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.m{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px 10px}
+.m small{display:block;color:var(--mu);font-size:.76rem}.m b{font-size:1rem;word-break:break-word}
+.pb{height:6px;background:var(--bd);border-radius:4px;margin:6px 0 12px}.pb i{display:block;height:100%;background:var(--ac2);border-radius:4px}
+.op{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;cursor:pointer}
+.op:hover:not(:disabled){border-color:var(--ac2)}.op:disabled{cursor:default;opacity:.95}
+.op.ok{background:color-mix(in srgb,var(--ok) 25%,var(--card));border-color:var(--ok)}
+.op.no{background:color-mix(in srgb,var(--er) 22%,var(--card));border-color:var(--er)}
+#fb{margin-top:10px}#fb p{margin:0 0 10px}
+.big{font:700 3rem/1 Georgia,serif;color:var(--ac)}
+#qr{background:#fff;padding:14px;border-radius:10px;display:inline-block;min-width:248px;min-height:248px;color:#222;border:1px solid var(--bd)}
+.qf{width:220px;text-align:center;font-size:.85rem;word-break:break-all}.qf span{font-size:4rem;line-height:1.1;display:block}
+footer{text-align:center;color:var(--mu);font-size:.85rem;padding:0 14px 28px}
+</style>
+</head>
+<body>
+<header><div class="w">
+<h1>Laboratorio Virtual de Termodinámica</h1>
+<p>Temperatura, conductividad térmica y leyes de la termodinámica. Autor: <b>Hugo Omar Gamez Arroyo</b></p>
+<nav>
+<button class="on" data-t="teoria">Teoría</button>
+<button data-t="sim">Simulador</button>
+<button data-t="evaluacion">Evaluación</button>
+<button data-t="autor">Autor y QR</button>
+</nav></div></header>
+
+<main class="w">
+<section id="teoria" class="on">
+<div class="cols">
+<div class="card"><h2>Escalas de temperatura</h2>
+<p>La temperatura mide la agitación media de las partículas de un cuerpo. Las tres escalas más usadas se relacionan con los puntos de congelación y ebullición del agua:</p>
+<table><tr><th>Escala</th><th>Congelación</th><th>Ebullición</th></tr><tr><td>Celsius (°C)</td><td>0</td><td>100</td></tr><tr><td>Kelvin (K)</td><td>273.15</td><td>373.15</td></tr><tr><td>Fahrenheit (°F)</td><td>32</td><td>212</td></tr></table>
+<div class="eq">K = °C + 273.15</div>
+<div class="eq">°F = {9|5} °C + 32 &nbsp;&nbsp; °C = {5|9}(°F − 32)</div>
+<p>El <b>cero absoluto</b> (0 K = −273.15 °C = −459.67 °F) es el límite inferior: no existen temperaturas menores. Un cambio de 1 K equivale a 1 °C y a 1.8 °F.</p></div>
+
+<div class="card"><h2>Calor, capacidad calorífica y conducción</h2>
+<p>El <b>calor específico</b> <i>c</i> es la energía que necesita 1 kg de una sustancia para subir 1 K su temperatura.</p>
+<div class="eq">Q = m·c·ΔT &nbsp;&nbsp; ΔT = T<sub>f</sub> − T<sub>i</sub></div>
+<div class="eq">C = {Q|ΔT} = m·c &nbsp; (J/K)</div>
+<p>Al mezclar dos cuerpos aislados, el calor que cede uno lo absorbe el otro:</p>
+<div class="eq">T<sub>f</sub> = {m₁c₁T₁ + m₂c₂T₂|m₁c₁ + m₂c₂}</div>
+<p>La <b>conducción</b> transfiere calor por choques entre partículas vecinas, sin transporte de materia. A través de una barra de longitud <i>L</i> y área <i>A</i>:</p>
+<div class="eq">{Q|t} = {k·A·ΔT|L} &nbsp;&nbsp; R = {L|k·A}</div>
+<p><i>k</i> se mide en W/(m·K). En el simulador la barra evoluciona con la ecuación del calor, donde α = k/(ρc) es la difusividad térmica:</p>
+<div class="eq">{∂T|∂t} = α {∂²T|∂x²}</div>
+<table id="mt"></table></div>
+
+<div class="card"><h2>Leyes de la termodinámica</h2>
+<h3>Ley Cero</h3><p>Si A está en equilibrio térmico con B, y B con C, entonces A está en equilibrio con C. Es la base del termómetro y del concepto de temperatura.</p>
+<h3>Primera Ley</h3><p>La energía se conserva. W es el trabajo que realiza el sistema:</p>
+<div class="eq">ΔU = Q − W</div>
+<h3>Segunda Ley</h3><p>El calor fluye espontáneamente del cuerpo caliente al frío, y la entropía de un sistema aislado nunca disminuye. Al pasar Q de T<sub>h</sub> a T<sub>c</sub>:</p>
+<div class="eq">ΔS = Q({1|T<sub>c</sub>} − {1|T<sub>h</sub>}) ≥ 0</div>
+<h3>Tercera Ley</h3><p>Al acercarse a 0 K, la entropía de un cristal perfecto tiende a cero, y no se puede llegar al cero absoluto con un número finito de pasos.</p>
+<p><button class="btn o" data-go="sim">Probarlo en el simulador</button></p></div>
+</div></section>
+
+<section id="sim"><div class="sim">
+<div class="card"><h2>Panel de control</h2>
+<div class="f"><label for="sc">Escala de temperatura</label><select id="sc"><option value="C">Celsius (°C)</option><option value="K">Kelvin (K)</option><option value="F">Fahrenheit (°F)</option></select></div>
+<div class="f"><label for="mat">Material de la barra</label><select id="mat"></select></div>
+<div id="ctl"></div><div id="warn" role="alert"></div></div>
+<div>
+<div class="card"><div class="bar"><button class="btn o" id="b_go">▶ Iniciar</button><button class="btn" id="b_pa">⏸ Pausar</button><button class="btn s" id="b_st">⏹ Detener / Reiniciar</button></div>
+<canvas id="cv" aria-label="Barra con gradiente térmico y gráfica de temperatura"></canvas>
+<p style="font-size:.85rem;color:var(--mu);margin-bottom:0">Pasa el cursor sobre la gráfica para leer la temperatura en cada punto. Las flechas blancas indican el sentido del flujo de calor.</p></div>
+<div class="card"><div class="ro" id="ro"></div></div>
+</div></div></section>
+
+<section id="evaluacion"><div class="card" id="qz"></div></section>
+
+<section id="autor"><div class="cols">
+<div class="card"><h2>Autor</h2><p class="big" style="font-size:1.8rem">Hugo Omar Gamez Arroyo</p>
+<p>Laboratorio virtual de termodinámica: escalas de temperatura, capacidad calorífica, conductividad térmica y leyes de la termodinámica.</p></div>
+<div class="card"><h2>Acceso y compartir</h2>
+<p>Escanea el código para abrir el laboratorio desde otro dispositivo. Si lo publicas en una subruta, cambia la dirección y genera el QR de nuevo.</p>
+<div class="f"><label for="url">Dirección del laboratorio</label><input type="text" id="url" inputmode="url"></div>
+<div class="bar"><button class="btn" id="b_qr">Generar QR</button><button class="btn s" id="b_cp">Copiar enlace</button><button class="btn s" id="b_dl">Descargar QR</button></div>
+<div id="qw" role="status" style="color:var(--er);min-height:1.5em"></div>
+<div id="qr"></div></div>
+</div></section>
+</main>
+<footer>Laboratorio Virtual de Termodinámica. Autor: Hugo Omar Gamez Arroyo</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';document.head.appendChild(s)"></script>
+<script>
+const BASE_URL="https://smghugo19.github.io/"; // Cambia aquí la dirección si publicas en una subruta
+const $=id=>document.getElementById(id),N=60,R=.4;
+const MATS={cobre:["Cobre",401,385,8960],aluminio:["Aluminio",237,897,2700],acero:["Acero",50,490,7850],vidrio:["Vidrio",1,840,2500],madera:["Madera (pino)",.15,1700,550],espuma:["Espuma aislante",.03,1300,30]};
+const SC={C:{u:"°C",to:c=>c,from:s=>s},K:{u:"K",to:c=>c+273.15,from:s=>s-273.15},F:{u:"°F",to:c=>c*1.8+32,from:s=>(s-32)/1.8}};
+// id, etiqueta, unidad ("T" = temperatura), mín, máx, paso, valor (temperaturas en °C)
+const F=[["tl","Temperatura extremo izquierdo","T",-50,500,1,100],["tr","Temperatura extremo derecho","T",-50,500,1,0],["t0","Temperatura inicial (al reiniciar)","T",-50,500,1,20],
+["L","Longitud L","m",.05,5,.05,1],["A","Área transversal A","cm²",.5,100,.5,4],["k","Conductividad k","W/m·K",.01,500,.01,401],["c","Calor específico c","J/kg·K",100,5000,1,385],["rho","Densidad ρ","kg/m³",10,12000,1,8960],["sp","Velocidad de simulación","×",1,20,1,3]];
+const LIM={L:[.01,10],A:[.1,1000],k:[.001,1000],c:[1,2e4],rho:[1,3e4],sp:[1,20]};
+const ROS=[["t","Tiempo físico"],["ta","Temperatura media"],["fl","Q/t extremo izq."],["fr","Q/t extremo der."],["fs","Q/t estacionario"],["sg","Generación de entropía"],["du","ΔU de la barra"],["ms","Masa de la barra"],["es","Estado"]];
+let P,ok=true,run=false,stt="Detenida",t=0,avg0=0,T=new Float64Array(N),U=new Float64Array(N),cur="C",px=null,ph=0,fl=0,fr=0,tab="teoria";
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+const ts=(c,p=1)=>{const s=SC[$("sc").value];return s.to(c).toFixed(p)+" "+s.u};
+const fm=(x,u)=>{const a=Math.abs(x);return(a!==0&&(a<.01||a>=1e5)?x.toExponential(2):x.toFixed(a<10?3:a<1000?2:1))+" "+u};
+const ft=s=>s<120?s.toFixed(1)+" s":s<7200?(s/60).toFixed(1)+" min":s<172800?(s/3600).toFixed(2)+" h":(s/86400).toFixed(2)+" días";
+
+/* Navegación */
+function go(n){tab=n;document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===n));document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===n));scrollTo(0,0)}
+document.querySelectorAll("nav button,[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.t||b.dataset.go));
+
+/* Teoría */
+document.querySelectorAll(".eq").forEach(e=>e.innerHTML=e.innerHTML.replace(/\{([^{}|]+)\|([^{}]+)\}/g,'<span class="fr"><span>$1</span><span>$2</span></span>'));
+$("mt").innerHTML="<tr><th>Material</th><th>k (W/m·K)</th><th>c (J/kg·K)</th><th>ρ (kg/m³)</th></tr>"+Object.values(MATS).map(m=>`<tr><td>${m[0]}</td><td>${m[1]}</td><td>${m[2]}</td><td>${m[3]}</td></tr>`).join("");
+
+/* Panel de control */
+$("ctl").innerHTML=F.map(f=>`<div class="f"><label for="n_${f[0]}"><span>${f[1]}</span><span id="u_${f[0]}">${f[2]==="T"?"":f[2]}</span></label><div class="r"><input type="range" id="s_${f[0]}" data-id="${f[0]}" min="${f[3]}" max="${f[4]}" step="${f[5]}" value="${f[6]}" aria-label="${f[1]}"><input type="number" id="n_${f[0]}" data-id="${f[0]}" step="any" value="${f[6]}"></div></div>`).join("");
+$("mat").innerHTML=Object.entries(MATS).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("")+'<option value="x">Personalizado</option>';
+$("ro").innerHTML=ROS.map(([k,n])=>`<div class="m"><small>${n}</small><b id="r_${k}">—</b></div>`).join("");
+
+function read(){
+ const sc=SC[$("sc").value],v={},er=[];
+ F.forEach(f=>{const id=f[0],el=$("n_"+id),s=el.value.trim(),x=s===""?NaN:Number(s);let m="";el.classList.remove("bad");
+  if(!isFinite(x))m="el valor está vacío o no es un número";
+  else if(f[2]==="T"){const K=sc.from(x)+273.15;if(K<=0)m="no puede estar en o por debajo del cero absoluto (−273.15 °C)";else if(K>5000)m="excede el límite de 5000 K"}
+  else{const[lo,hi]=LIM[id];if(x<lo||x>hi)m=`debe estar entre ${lo} y ${hi}`+(id==="sp"?"":" (no se admiten negativos ni cero)");else if(id==="sp"&&!Number.isInteger(x))m="debe ser un número entero"}
+  if(m){er.push(f[1]+": "+m);el.classList.add("bad")}else v[id]=f[2]==="T"?sc.from(x):x});
+ const w=$("warn");
+ if(er.length){ok=false;w.style.display="block";w.innerHTML="<b>Datos no válidos.</b> Se mantienen los últimos valores correctos:<ul>"+er.map(e=>"<li>"+e+"</li>").join("")+"</ul>";return}
+ ok=true;w.style.display="none";
+ const A=v.A*1e-4;P={tl:v.tl,tr:v.tr,t0:v.t0,L:v.L,A,k:v.k,c:v.c,rho:v.rho,sp:v.sp,dx:v.L/(N-1),al:v.k/(v.rho*v.c),m:v.rho*A*v.L};
+ T[0]=P.tl;T[N-1]=P.tr;
+}
+function setScale(){
+ const o=SC[cur],n=SC[$("sc").value];
+ F.forEach(f=>{if(f[2]!=="T")return;const el=$("n_"+f[0]),s=$("s_"+f[0]),x=parseFloat(el.value);
+  if(isFinite(x))el.value=+n.to(o.from(x)).toFixed(2);
+  s.min=+n.to(f[3]).toFixed(2);s.max=+n.to(f[4]).toFixed(2);s.value=el.value;$("u_"+f[0]).textContent=n.u});
+ cur=$("sc").value;read();
+}
+$("sc").onchange=()=>{setScale();if(ok&&stt==="Detenida")reset()};
+$("ctl").oninput=e=>{const id=e.target.dataset.id;if(!id)return;
+ (e.target.type==="range"?$("n_"+id):$("s_"+id)).value=e.target.value;
+ if(["k","c","rho"].includes(id))$("mat").value="x";
+ read();if(ok&&stt==="Detenida")reset()};
+$("mat").onchange=e=>{const m=MATS[e.target.value];if(!m)return;
+ [["k",m[1]],["c",m[2]],["rho",m[3]]].forEach(([i,x])=>{$("n_"+i).value=x;$("s_"+i).value=x});
+ read();if(ok&&stt==="Detenida")reset()};
+
+/* Física: ecuación del calor 1D, diferencias finitas, extremos a temperatura fija */
+function reset(){run=false;stt="Detenida";t=0;T.fill(P.t0);T[0]=P.tl;T[N-1]=P.tr;avg0=mean(T);ph=0}
+function step(){
+ T[0]=P.tl;T[N-1]=P.tr;
+ for(let i=1;i<N-1;i++)U[i]=T[i]+R*(T[i-1]-2*T[i]+T[i+1]);
+ U[0]=P.tl;U[N-1]=P.tr;[T,U]=[U,T];t+=R*P.dx*P.dx/P.al;
+}
+$("b_go").onclick=()=>{read();if(!ok)return;run=true;stt="En ejecución"};
+$("b_pa").onclick=()=>{if(run){run=false;stt="Pausada"}};
+$("b_st").onclick=()=>{read();reset()};
+
+function ro(){
+ const kA=P.k*P.A,s=P.dx;let S=0;
+ for(let i=0;i<N-1;i++){const a=T[i]+273.15,b=T[i+1]+273.15;S+=kA*(a-b)**2/(s*a*b)}
+ fl=kA*(T[0]-T[1])/s;fr=kA*(T[N-2]-T[N-1])/s;
+ const av=mean(T),est=Math.abs(fl-fr)<=.02*Math.max(Math.abs(fl),Math.abs(fr))+1e-12;
+ const V={t:ft(t),ta:ts(av),fl:fm(fl,"W"),fr:fm(fr,"W"),fs:fm(kA*(P.tl-P.tr)/P.L,"W"),sg:fm(S,"W/K"),du:fm(P.m*P.c*(av-avg0),"J"),ms:fm(P.m,"kg"),es:stt+(t>0?(est?", estacionario":", transitorio"):"")};
+ for(const k in V)$("r_"+k).textContent=V[k];
+}
+
+/* Dibujo */
+const cv=$("cv");
+cv.onmousemove=e=>px=e.offsetX;cv.onmouseleave=()=>px=null;
+cv.addEventListener("touchmove",e=>{px=e.touches[0].clientX-cv.getBoundingClientRect().left},{passive:true});
+function draw(){
+ const g=cv.getContext("2d"),W=cv.clientWidth,H=cv.clientHeight,d=devicePixelRatio||1;
+ if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){cv.width=Math.round(W*d);cv.height=Math.round(H*d)}
+ g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,W,H);
+ const cs=getComputedStyle(document.documentElement),tx=cs.getPropertyValue("--tx").trim(),mu=cs.getPropertyValue("--mu").trim(),ac=cs.getPropertyValue("--ac").trim();
+ const lo=Math.min(P.tl,P.tr,P.t0),h0=Math.max(P.tl,P.tr,P.t0),hi=h0-lo<1?lo+1:h0;
+ const col=x=>`hsl(${220*(1-Math.min(1,Math.max(0,(x-lo)/(hi-lo))))},85%,52%)`;
+ const x0=46,rw=W-92,ry=40,rh=60,cw=rw/N;
+ g.font="13px system-ui,sans-serif";g.fillStyle=tx;g.textAlign="left";g.fillText("Izq.: "+ts(P.tl),x0,ry-12);g.textAlign="right";g.fillText("Der.: "+ts(P.tr),x0+rw,ry-12);
+ for(let i=0;i<N;i++){g.fillStyle=col(T[i]);g.fillRect(x0+i*cw,ry,cw+1,rh)}
+ g.fillStyle=col(P.tl);g.fillRect(x0-18,ry-4,16,rh+8);g.fillStyle=col(P.tr);g.fillRect(x0+rw+2,ry-4,16,rh+8);
+ g.strokeStyle=mu;g.lineWidth=1;g.strokeRect(x0,ry,rw,rh);
+ if(Math.abs(fl)>1e-9){
+  const s=fl>0?1:-1,y=ry+rh/2;if(run)ph=(ph+1.5*s)%40;
+  g.strokeStyle="#fff";g.lineWidth=2.5;
+  for(let x=((ph%40)+40)%40;x<rw-8;x+=40){const X=x0+x+8;g.beginPath();g.moveTo(X-4*s,y-8);g.lineTo(X+4*s,y);g.lineTo(X-4*s,y+8);g.stroke()}
+ }
+ const ly=ry+rh+16;
+ for(let i=0;i<60;i++){g.fillStyle=col(lo+(hi-lo)*i/59);g.fillRect(x0+i*rw/60,ly,rw/60+1,8)}
+ g.fillStyle=mu;g.font="12px system-ui,sans-serif";g.textAlign="left";g.fillText(ts(lo),x0,ly+24);g.textAlign="right";g.fillText(ts(hi),x0+rw,ly+24);g.textAlign="center";g.fillText("escala de color",x0+rw/2,ly+24);
+ const py=ly+52,h2=H-py-30,a=lo-.08*(hi-lo),b=hi+.08*(hi-lo),Y=v=>py+h2*(1-(v-a)/(b-a)),X=i=>x0+i*rw/(N-1);
+ g.strokeStyle=mu;g.lineWidth=1;g.beginPath();g.moveTo(x0,py);g.lineTo(x0,py+h2);g.lineTo(x0+rw,py+h2);g.stroke();
+ g.setLineDash([5,4]);g.beginPath();g.moveTo(X(0),Y(P.tl));g.lineTo(X(N-1),Y(P.tr));g.stroke();g.setLineDash([]);
+ g.beginPath();for(let i=0;i<N;i++)i?g.lineTo(X(i),Y(T[i])):g.moveTo(X(i),Y(T[i]));g.strokeStyle=ac;g.lineWidth=3;g.stroke();
+ g.fillStyle=mu;g.textAlign="left";g.fillText("T(x). Punteada: perfil estacionario",x0+8,py-6);
+ g.textAlign="right";g.fillText(ts(hi,0),x0-4,Y(hi)+4);g.fillText(ts(lo,0),x0-4,Y(lo)+4);
+ g.fillText("x = "+P.L+" m",x0+rw,py+h2+16);g.textAlign="left";g.fillText("0",x0,py+h2+16);
+ if(px!==null&&px>=x0&&px<=x0+rw){
+  const u=(px-x0)/rw,f=u*(N-1),i=Math.min(N-2,Math.floor(f)),v=T[i]+(T[i+1]-T[i])*(f-i);
+  g.strokeStyle=mu;g.lineWidth=1;g.beginPath();g.moveTo(px,py);g.lineTo(px,py+h2);g.stroke();
+  g.fillStyle=ac;g.beginPath();g.arc(px,Y(v),5,0,7);g.fill();
+  g.fillStyle=tx;g.textAlign=u>.6?"right":"left";g.fillText(`x = ${(u*P.L).toFixed(3)} m: ${ts(v)}`,px+(u>.6?-8:8),py+14);
+ }
+}
+function loop(){if(tab==="sim"){if(run)for(let i=0;i<P.sp*3;i++)step();ro();draw()}requestAnimationFrame(loop)}
+
+/* Evaluación */
+const Q=[
+["¿A cuántos kelvin equivalen 0 °C?",["0 K","273.15 K","373.15 K","−273.15 K"],1,"K = °C + 273.15. El punto de congelación del agua (0 °C) corresponde a 273.15 K."],
+["El agua hierve a 100 °C al nivel del mar. ¿Cuánto es en °F?",["132 °F","180 °F","212 °F","373 °F"],2,"°F = 9/5·°C + 32 = 9/5·100 + 32 = 212 °F."],
+["¿Cuál es el valor del cero absoluto en grados Celsius?",["0 °C","−100 °C","−273.15 °C","−459.67 °C"],2,"0 K = −273.15 °C (equivale a −459.67 °F). Es el límite inferior de la temperatura."],
+["¿A qué temperatura coinciden las lecturas de las escalas Celsius y Fahrenheit?",["0","−40","32","100"],1,"Si °F = °C = x, entonces x = 9x/5 + 32, de donde x = −40."],
+["¿Cuál de estas sustancias tiene el mayor calor específico?",["Cobre","Hierro","Agua líquida","Aluminio"],2,"El agua tiene c ≈ 4186 J/(kg·K), muy superior al cobre (385) o al hierro (449). Por eso tarda en calentarse y en enfriarse."],
+["¿Cuánto calor se necesita para elevar 10 K la temperatura de 0.5 kg de agua (c = 4186 J/kg·K)?",["2.09 kJ","20.9 kJ","41.9 kJ","209 kJ"],1,"Q = m·c·ΔT = 0.5 × 4186 × 10 = 20 930 J ≈ 20.9 kJ."],
+["La capacidad calorífica C de un cuerpo de masa m y calor específico c es:",["C = m/c","C = c/m","C = m·c","C = m·c·ΔT"],2,"C = Q/ΔT = m·c y se mide en J/K. Depende de la cantidad de materia; el calor específico c es propio del material."],
+["En Q/t = kAΔT/L, si se duplica la longitud L de la barra (lo demás igual), el flujo de calor:",["se duplica","se reduce a la mitad","se cuadruplica","no cambia"],1,"El flujo es inversamente proporcional a L: con el doble de longitud, Q/t se reduce a la mitad."],
+["Si en una barra se duplican a la vez el área A y la diferencia de temperatura ΔT, el flujo de calor Q/t:",["se duplica","se triplica","se cuadruplica","se reduce a la mitad"],2,"Q/t es proporcional a A y a ΔT, así que aumenta 2 × 2 = 4 veces."],
+["¿Cuál de estos materiales es el mejor conductor térmico?",["Madera","Vidrio","Cobre","Poliestireno"],2,"El cobre tiene k ≈ 401 W/(m·K); la madera y las espumas aislantes tienen valores cientos de veces menores."],
+["¿Cuáles son las unidades de la conductividad térmica k en el SI?",["J/(kg·K)","W/(m·K)","W/m²","J/K"],1,"De k = (Q/t)·L/(A·ΔT) resulta W·m/(m²·K) = W/(m·K)."],
+["La Ley Cero establece que si A está en equilibrio térmico con B, y B con C, entonces:",["A y C tienen temperaturas distintas","A y C están en equilibrio térmico entre sí","el calor fluye de A a C","la energía interna de A y C es la misma"],1,"Esta transitividad permite definir la temperatura y justifica el uso del termómetro."],
+["La expresión de la Primera Ley de la termodinámica es (W = trabajo realizado por el sistema):",["ΔU = Q + W","ΔU = Q − W","ΔU = W − Q","ΔU = Q·W"],1,"ΔU = Q − W: la energía interna cambia según el calor recibido menos el trabajo que el sistema realiza. Es la conservación de la energía."],
+["Un sistema absorbe 300 J de calor y realiza 120 J de trabajo. ¿Cuál es su cambio de energía interna?",["−180 J","120 J","180 J","420 J"],2,"ΔU = Q − W = 300 − 120 = 180 J."],
+["En un sistema completamente aislado (Q = 0 y W = 0), la energía interna:",["aumenta siempre","disminuye siempre","permanece constante","tiende a cero"],2,"Sin intercambio de calor ni de trabajo, ΔU = 0: la energía se conserva."],
+["Según la Segunda Ley, el calor fluye de manera espontánea:",["del cuerpo frío al caliente","del cuerpo caliente al frío","en ambos sentidos por igual","sólo entre cuerpos de igual temperatura"],1,"Para ir de frío a caliente hace falta trabajo externo (como en un refrigerador). Espontáneamente el flujo va de caliente a frío y la entropía aumenta."],
+["En un sistema aislado, la entropía total en un proceso espontáneo:",["nunca disminuye","siempre disminuye","siempre es cero","se mantiene igual en todo proceso"],0,"ΔS ≥ 0: aumenta en los procesos irreversibles y sólo se mantiene constante en procesos ideales reversibles."],
+["La Tercera Ley de la termodinámica implica que:",["la entropía es máxima en el cero absoluto","la energía siempre se conserva","es imposible alcanzar el cero absoluto en un número finito de pasos","el calor siempre fluye hacia el cuerpo de menor masa"],2,"Cuando T → 0 K la entropía de un cristal perfecto tiende a cero, pero ningún proceso finito llega al cero absoluto."],
+["Se mezclan 1 kg de agua a 80 °C con 1 kg de agua a 20 °C en un recipiente aislado. ¿Cuál es la temperatura final de equilibrio?",["40 °C","50 °C","60 °C","100 °C"],1,"Con masas y calores específicos iguales, T<sub>f</sub> = (80 + 20)/2 = 50 °C: el calor cedido iguala al absorbido."],
+["En una barra homogénea con sus extremos a distinta temperatura fija, en régimen estacionario el perfil de temperatura es:",["exponencial","lineal","parabólico","constante en toda la barra"],1,"En estado estacionario el flujo es igual en cada sección, así que dT/dx es constante y T varía linealmente (la línea punteada del simulador)."]
+];
+let items=[],qi=0,score=0,res=[],done=false;
+const sh=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function intro(){$("qz").innerHTML=`<h2>Evaluación</h2><p>El banco tiene ${Q.length} preguntas de opción múltiple. En cada intento se eligen 5 al azar y al final recibes tu calificación.</p><button class="btn o" id="beg">Comenzar evaluación</button>`}
+function startQ(){items=sh([...Q.keys()]).slice(0,5).map(i=>({q:Q[i][0],o:sh(Q[i][1].map((x,j)=>({t:x,ok:j===Q[i][2]}))),e:Q[i][3]}));qi=0;score=0;res=[];showQ()}
+function showQ(){
+ const it=items[qi];done=false;
+ $("qz").innerHTML=`<small>Pregunta ${qi+1} de 5. Aciertos: ${score}</small><div class="pb"><i style="width:${qi*20}%"></i></div><h2>${it.q}</h2>${it.o.map((o,j)=>`<button class="op" data-j="${j}">${"ABCD"[j]}. ${o.t}</button>`).join("")}<div id="fb"></div>`;
+}
+function endQ(){
+ const g=score*2,msg=score===5?"Dominas el tema.":score>=4?"Muy buen resultado.":score>=3?"Aprobado. Repasa los puntos que fallaste.":"Conviene repasar la teoría y practicar con el simulador.";
+ $("qz").innerHTML=`<h2>Resultado</h2><p class="big">${g}/10</p><p><b>${score} de 5 respuestas correctas.</b> ${msg}</p><ul>${res.map(r=>`<li>${r.ok?"✅":"❌"} ${r.q}</li>`).join("")}</ul><button class="btn o" id="beg">Nuevo intento con 5 preguntas al azar</button>`;
+}
+$("qz").onclick=e=>{
+ const b=e.target.closest("button");if(!b)return;
+ if(b.id==="beg")return startQ();
+ if(b.id==="nx"){qi++;return qi<5?showQ():endQ()}
+ if(b.classList.contains("op")&&!done){
+  done=true;const it=items[qi],o=it.o[+b.dataset.j];if(o.ok)score++;res.push({q:it.q,ok:o.ok});
+  document.querySelectorAll(".op").forEach((x,j)=>{x.disabled=true;if(it.o[j].ok)x.classList.add("ok");else if(x===b)x.classList.add("no")});
+  $("fb").innerHTML=`<p>${o.ok?"<b>Correcto.</b> ":"<b>Incorrecto.</b> "}${it.e}</p><button class="btn" id="nx">${qi<4?"Siguiente pregunta":"Ver resultado"}</button>`;
+  $("nx").focus();
+ }
+};
+
+/* Autoría y código QR */
+function mkQR(){
+ const u=$("url").value.trim(),b=$("qr"),w=$("qw");b.innerHTML="";w.textContent="";
+ if(!/^https?:\/\/\S+$/i.test(u)){w.textContent="Escribe una dirección válida que empiece con http:// o https://";return}
+ if(typeof QRCode==="undefined"){
+  const d=document.createElement("div"),a=document.createElement("a");d.className="qf";d.innerHTML="<span>▦</span>No se pudo cargar la librería del QR (sin conexión). Usa este enlace:<br>";a.href=u;a.textContent=u;a.target="_blank";a.rel="noopener";d.appendChild(a);b.appendChild(d);return;
+ }
+ new QRCode(b,{text:u,width:220,height:220,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+}
+$("url").value=BASE_URL;
+$("b_qr").onclick=mkQR;
+$("url").onkeydown=e=>{if(e.key==="Enter")mkQR()};
+$("b_cp").onclick=()=>{const u=$("url").value.trim(),w=$("qw");
+ const fail=()=>{$("url").select();w.textContent="No se pudo copiar de forma automática. El enlace quedó seleccionado: copia con Ctrl+C."};
+ navigator.clipboard?navigator.clipboard.writeText(u).then(()=>{w.textContent="";alert("Enlace copiado")},fail):fail()};
+$("b_dl").onclick=()=>{const c=$("qr").querySelector("canvas");
+ if(!c){$("qw").textContent="Primero genera el QR (requiere conexión para cargar la librería).";return}
+ const a=document.createElement("a");a.href=c.toDataURL("image/png");a.download="qr-laboratorio-termodinamica.png";a.click()};
+addEventListener("load",()=>{if(!$("qr").children.length)mkQR()});
+
+/* Inicio */
+$("mat").value="cobre";setScale();reset();intro();mkQR();loop();
+</script>
+</body>
+</html>
